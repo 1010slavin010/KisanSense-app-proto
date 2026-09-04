@@ -15,7 +15,7 @@ import streamlit as st
 
 from components.navbar import render_navbar
 from utils.config import APP_NAME, PAGE_ICON
-from views import alerts, assistant, farm, home, irrigation, vision
+from views import alerts, assistance, farm, home, irrigation, vision
 
 PAGES = {
     "home": home,
