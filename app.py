@@ -3,12 +3,8 @@
 Handles page configuration, global styling, and session-state-based
 navigation between pages.
 
-Note on structure: the suggested project layout used a top-level
-pages/ folder, but Streamlit auto-detects any folder literally named
-pages/ next to the entry script and builds its own default sidebar
-navigation from it. That would conflict with the custom navbar and
-routing built here, so this app uses views/ instead — same role,
-different name, to avoid that collision.
+The project intentionally uses views/ instead of Streamlit's special
+pages/ directory so the custom top navigation remains in control.
 """
 
 import streamlit as st
@@ -22,7 +18,7 @@ PAGES = {
     "farm": farm,
     "irrigation": irrigation,
     "vision": vision,
-    "assistant": assistant,
+    "assistant": assistance,
     "alerts": alerts,
 }
 
