@@ -2,7 +2,7 @@
 
 Shows current farm conditions (soil, temperature, air humidity, irrigation),
 active farm context, sensor connectivity status, telemetry-driven alerts,
-simulation environment controls, and the "Ask KisanSense" assistant.
+hybrid telemetry controls (Simulation vs ESP32 Hardware), and the assistant.
 """
 
 from __future__ import annotations
@@ -17,15 +17,26 @@ from services.farm_service import (
     get_farm_profile,
     is_profile_configured,
 )
+from services.hardware_client import HardwareClient
 from services.irrigation_service import get_irrigation_status
-from services.sensor_service import SensorReading, get_current_sensor_data
-from services.sensor_simulator import (
+from services.telemetry_server import (
+    DEFAULT_HTTP_PORT,
+    is_telemetry_server_running,
+    start_telemetry_server,
+)
+from services.sensor_service import (
     ALL_CONDITIONS,
+    ALL_MODES,
     CONDITION_DRY,
     CONDITION_HOT,
     CONDITION_NORMAL,
     CONDITION_OFFLINE,
     CONDITION_WET,
+    MODE_HARDWARE,
+    MODE_SIMULATION,
+    SensorReading,
+    get_current_sensor_data,
+    get_telemetry_mode,
 )
 from utils.config import APP_NAME
 from utils.helpers import (
@@ -38,13 +49,27 @@ from utils.translations import t
 
 
 def _get_sensor_reading(farm_ctx: dict) -> SensorReading:
-    """Fetch or retrieve the current sensor reading from session state."""
+    """Fetch or retrieve the current sensor reading from session state.
+
+    In HARDWARE mode: Always fetches fresh telemetry from TelemetryStore on each rerun
+    so that newly arrived packets or staleness timeouts reflect immediately.
+    In SIMULATION mode: Preserves session state for smooth time-drift stability.
+    """
+    mode = st.session_state.get("telemetry_mode", MODE_SIMULATION)
     cond = st.session_state.get("sim_condition", CONDITION_NORMAL)
     prev = st.session_state.get("sensor_reading")
 
-    if prev is None or getattr(prev, "condition", None) != cond:
+    if mode == MODE_HARDWARE:
         st.session_state.sensor_reading = get_current_sensor_data(
-            farm_context=farm_ctx, condition=cond
+            farm_context=farm_ctx, mode=mode
+        )
+    elif (
+        prev is None
+        or getattr(prev, "source", "") != mode
+        or getattr(prev, "condition", None) != cond
+    ):
+        st.session_state.sensor_reading = get_current_sensor_data(
+            farm_context=farm_ctx, condition=cond, mode=mode
         )
     return st.session_state.sensor_reading
 
@@ -64,12 +89,17 @@ def render() -> None:
         render_status_dot(t("home_status_active"))
     with header_cols[1]:
         # Sensor connectivity dot & timestamp
+        source_tag = (
+            t("sensor_source_hardware")
+            if reading.source == MODE_HARDWARE
+            else t("sensor_source_simulation")
+        )
         if reading.is_online:
             dot_color = "var(--color-good)"
-            status_text = f"{t('sensor_online_label')} • {t('sensor_last_updated')} {reading.last_updated}"
+            status_text = f"{t('sensor_online_label')} ({source_tag}) • {t('sensor_last_updated')} {reading.last_updated}"
         else:
             dot_color = "var(--color-alert)"
-            status_text = f"{t('sensor_offline_label')}"
+            status_text = f"{t('sensor_offline_label')} ({source_tag})"
 
         st.markdown(
             f"""
@@ -80,6 +110,23 @@ def render() -> None:
             """,
             unsafe_allow_html=True,
         )
+
+    # Hardware Diagnostics Bar (if in hardware mode)
+    if reading.source == MODE_HARDWARE and reading.is_online:
+        batt_str = f"🔋 {reading.battery_voltage:.2f}V" if reading.battery_voltage is not None else ""
+        rssi_str = f"📶 {reading.wifi_rssi} dBm" if reading.wifi_rssi is not None else ""
+        dev_str = f"Node: {reading.device_id}" if reading.device_id else ""
+        diag_parts = [p for p in (dev_str, batt_str, rssi_str) if p]
+
+        if diag_parts:
+            st.markdown(
+                f"""
+                <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 0.5rem; color: var(--color-text-muted); font-size: 0.82rem;">
+                    {' • '.join(diag_parts)}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
     # Active Farm Context Bar or Empty Prompt
     if has_profile:
@@ -117,12 +164,17 @@ def render() -> None:
     soil_label, soil_type = get_soil_status(reading.soil_moisture)
     temp_label, temp_type = get_temperature_status(reading.temperature)
     irrigation = get_irrigation_status(
-        reading.soil_moisture, farm_context=farm_ctx, is_online=reading.is_online
+        reading.soil_moisture,
+        farm_context=farm_ctx,
+        is_online=reading.is_online,
+        raw_status=getattr(reading, "raw_status", "ok"),
     )
 
     # Important Alerts banner
     if not reading.is_online:
         st.error(f"⚠️ **{t('home_alerts_title')}**: {t('alert_sensor_offline')}")
+    elif reading.battery_voltage and reading.battery_voltage < 3.4:
+        st.warning(f"⚠️ **{t('home_alerts_title')}**: {t('battery_low_alert')} ({reading.battery_voltage:.2f}V)")
     elif irrigation.needs_water:
         crop_target = f" for your {profile.crop}" if has_profile and profile.crop else ""
         st.warning(
@@ -195,42 +247,96 @@ def render() -> None:
             description=irrigation.detail,
         )
 
-    # Simulation environment controller
+    # Telemetry and Hardware Controls
     st.markdown('<div class="section-spacer" style="height: 1.5rem;"></div>', unsafe_allow_html=True)
-    with st.expander(f"🧪 {t('sim_condition_label')}", expanded=False):
-        c_sim1, c_sim2 = st.columns([3, 1])
-        with c_sim1:
-            condition_labels = {
-                CONDITION_NORMAL: t("sim_normal"),
-                CONDITION_DRY: t("sim_dry"),
-                CONDITION_WET: t("sim_wet"),
-                CONDITION_HOT: t("sim_hot"),
-                CONDITION_OFFLINE: t("sim_offline"),
-            }
-            current_cond = st.session_state.get("sim_condition", CONDITION_NORMAL)
-            cond_idx = ALL_CONDITIONS.index(current_cond) if current_cond in ALL_CONDITIONS else 0
+    with st.expander(f"⚙️ {t('sim_condition_label')}", expanded=False):
+        c_mode, c_detail = st.columns([1.5, 3])
 
-            def _on_cond_change() -> None:
+        with c_mode:
+            current_mode = st.session_state.get("telemetry_mode", MODE_SIMULATION)
+            mode_labels = {
+                MODE_SIMULATION: t("mode_simulation"),
+                MODE_HARDWARE: t("mode_hardware"),
+            }
+            def _on_mode_change() -> None:
                 st.session_state.sensor_reading = None
 
             st.selectbox(
-                "Condition",
-                options=ALL_CONDITIONS,
-                index=cond_idx,
-                format_func=lambda c: condition_labels.get(c, c),
-                key="sim_condition",
-                on_change=_on_cond_change,
-                label_visibility="collapsed",
+                t("telemetry_mode_label"),
+                options=ALL_MODES,
+                index=ALL_MODES.index(current_mode) if current_mode in ALL_MODES else 0,
+                format_func=lambda m: mode_labels.get(m, m),
+                key="telemetry_mode",
+                on_change=_on_mode_change,
             )
 
-        with c_sim2:
-            if st.button("🔄 Refresh", key="btn_refresh_sensor", use_container_width=True):
-                st.session_state.sensor_reading = get_current_sensor_data(
-                    farm_context=farm_ctx,
-                    condition=st.session_state.get("sim_condition", CONDITION_NORMAL),
-                    previous_reading=reading,
-                )
-                st.rerun()
+        with c_detail:
+            active_mode = st.session_state.get("telemetry_mode", MODE_SIMULATION)
+
+            if active_mode == MODE_SIMULATION:
+                c_sim1, c_sim2 = st.columns([3, 1])
+                with c_sim1:
+                    condition_labels = {
+                        CONDITION_NORMAL: t("sim_normal"),
+                        CONDITION_DRY: t("sim_dry"),
+                        CONDITION_WET: t("sim_wet"),
+                        CONDITION_HOT: t("sim_hot"),
+                        CONDITION_OFFLINE: t("sim_offline"),
+                    }
+                    current_cond = st.session_state.get("sim_condition", CONDITION_NORMAL)
+                    cond_idx = ALL_CONDITIONS.index(current_cond) if current_cond in ALL_CONDITIONS else 0
+
+                    def _on_cond_change() -> None:
+                        st.session_state.sensor_reading = None
+
+                    st.selectbox(
+                        "Condition",
+                        options=ALL_CONDITIONS,
+                        index=cond_idx,
+                        format_func=lambda c: condition_labels.get(c, c),
+                        key="sim_condition",
+                        on_change=_on_cond_change,
+                        label_visibility="collapsed",
+                    )
+
+                with c_sim2:
+                    if st.button("🔄 Refresh", key="btn_refresh_sensor", use_container_width=True):
+                        st.session_state.sensor_reading = get_current_sensor_data(
+                            farm_context=farm_ctx,
+                            condition=st.session_state.get("sim_condition", CONDITION_NORMAL),
+                            previous_reading=reading,
+                        )
+                        st.rerun()
+            else:
+                # Hardware test injector and live listener
+                if not is_telemetry_server_running():
+                    try:
+                        start_telemetry_server()
+                    except Exception:
+                        pass
+
+                c_hw1, c_hw2 = st.columns([3, 1.2])
+                with c_hw1:
+                    st.caption(
+                        f"📡 **ESP32 HTTP Ingestion**: Listening on `http://0.0.0.0:{DEFAULT_HTTP_PORT}/api/v1/telemetry` "
+                        f"(Header: `X-Sensor-Key`)."
+                    )
+                with c_hw2:
+                    if st.button("📡 Inject Mock ESP32", key="btn_inject_hw_mock", use_container_width=True):
+                        from datetime import datetime, timezone
+                        now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                        mock_pkt = {
+                            "device_id": "esp32-field-01",
+                            "soil_moisture": 38.5,
+                            "temperature": 27.2,
+                            "humidity": 64.0,
+                            "battery_voltage": 3.95,
+                            "wifi_rssi": -65,
+                            "timestamp": now_iso,
+                        }
+                        HardwareClient.ingest(mock_pkt, check_timestamp_skew=False)
+                        st.session_state.sensor_reading = None
+                        st.rerun()
 
     st.markdown('<div class="section-spacer"></div>', unsafe_allow_html=True)
     render_chatbot()

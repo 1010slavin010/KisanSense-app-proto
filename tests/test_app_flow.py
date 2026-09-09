@@ -211,6 +211,59 @@ class TestAppFlow(unittest.TestCase):
         reply_offline = at.session_state.chat_messages[-1]["content"]
         self.assertIn("offline", reply_offline.lower())
 
+    def test_hardware_telemetry_flow(self):
+        from services.hardware_client import HardwareClient
+        from services.telemetry_store import GLOBAL_TELEMETRY_STORE
+
+        GLOBAL_TELEMETRY_STORE.clear()
+        at = AppTest.from_file(APP_PATH).run()
+        self.assertFalse(at.exception)
+
+        # 1. Switch to hardware mode with empty store -> offline
+        at.session_state.telemetry_mode = "hardware"
+        at.session_state.sensor_reading = None
+        at.run()
+        self.assertFalse(at.exception)
+        self.assertTrue(len(at.error) > 0)
+        self.assertIn("offline", at.error[0].value.lower())
+
+        # 2. Ingest live hardware reading
+        HardwareClient.ingest({
+            "device_id": "esp32-field-test",
+            "soil_moisture": 42.0,
+            "temperature": 27.0,
+            "humidity": 60.0,
+            "battery_voltage": 3.90,
+            "wifi_rssi": -65,
+        })
+        at.session_state.sensor_reading = None
+        at.run()
+        self.assertFalse(at.exception)
+        GLOBAL_TELEMETRY_STORE.clear()
+
+    def test_hardware_low_battery_alert(self):
+        from services.hardware_client import HardwareClient
+        from services.telemetry_store import GLOBAL_TELEMETRY_STORE
+
+        GLOBAL_TELEMETRY_STORE.clear()
+        HardwareClient.ingest({
+            "device_id": "esp32-field-low-batt",
+            "soil_moisture": 45.0,
+            "temperature": 25.0,
+            "humidity": 60.0,
+            "battery_voltage": 3.20,  # Below 3.4V threshold
+            "wifi_rssi": -70,
+        })
+        at = AppTest.from_file(APP_PATH).run()
+        at.session_state.telemetry_mode = "hardware"
+        at.session_state.sensor_reading = None
+        at.run()
+        self.assertFalse(at.exception)
+        # Should surface low battery warning
+        self.assertTrue(len(at.warning) > 0)
+        self.assertTrue(any("battery" in w.value.lower() or "3.20" in w.value for w in at.warning))
+        GLOBAL_TELEMETRY_STORE.clear()
+
 
 if __name__ == "__main__":
     unittest.main()

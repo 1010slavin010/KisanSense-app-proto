@@ -31,6 +31,53 @@ class TestSensorService(unittest.TestCase):
         self.assertFalse(offline.is_online)
         self.assertEqual(offline.soil_moisture, 0.0)
 
+    def test_get_current_sensor_data_hardware_mode(self):
+        from services.hardware_client import HardwareClient
+        from services.telemetry_store import GLOBAL_TELEMETRY_STORE
+
+        GLOBAL_TELEMETRY_STORE.clear()
+        # Empty hardware store -> offline reading
+        off_reading = get_current_sensor_data(mode="hardware")
+        self.assertFalse(off_reading.is_online)
+        self.assertEqual(off_reading.source, "hardware")
+        self.assertEqual(off_reading.soil_moisture, 0.0)
+
+        # Ingest mock hardware packet
+        HardwareClient.ingest({
+            "device_id": "esp32-node-99",
+            "soil_moisture": 48.5,
+            "temperature": 27.5,
+            "humidity": 65.0,
+            "battery_voltage": 4.15,
+            "wifi_rssi": -60,
+        })
+        hw_reading = get_current_sensor_data(mode="hardware")
+        self.assertTrue(hw_reading.is_online)
+        self.assertEqual(hw_reading.source, "hardware")
+        self.assertEqual(hw_reading.device_id, "esp32-node-99")
+        self.assertEqual(hw_reading.soil_moisture, 48.5)
+        self.assertEqual(hw_reading.battery_voltage, 4.15)
+        self.assertEqual(hw_reading.wifi_rssi, -60)
+        GLOBAL_TELEMETRY_STORE.clear()
+
+    def test_sensor_reading_hardware_fields(self):
+        reading = SensorReading(
+            soil_moisture=40.0,
+            temperature=25.0,
+            humidity=55.0,
+            is_online=True,
+            device_id="esp32-01",
+            battery_voltage=3.85,
+            wifi_rssi=-70,
+            sensor_timestamp="2026-09-09T16:00:00Z",
+            raw_status="ok",
+        )
+        self.assertEqual(reading.device_id, "esp32-01")
+        self.assertEqual(reading.battery_voltage, 3.85)
+        self.assertEqual(reading.wifi_rssi, -70)
+        self.assertEqual(reading.sensor_timestamp, "2026-09-09T16:00:00Z")
+        self.assertEqual(reading.raw_status, "ok")
+
 
 class TestIrrigationService(unittest.TestCase):
     def test_thresholds_without_context(self):
@@ -64,6 +111,19 @@ class TestIrrigationService(unittest.TestCase):
         self.assertEqual(res_offline.label, "Sensor Offline")
         self.assertEqual(res_offline.status_type, "warning")
         self.assertIn("unavailable", res_offline.detail)
+
+    def test_irrigation_with_probe_disconnected(self):
+        # Disconnected probe reading 0.0 with raw_status="probe_disconnected"
+        # Must NEVER trigger irrigation
+        res_fault = get_irrigation_status(0.0, is_online=False, raw_status="probe_disconnected")
+        self.assertFalse(res_fault.needs_water)
+        self.assertEqual(res_fault.label, "Sensor Offline")
+        self.assertIn("disconnected", res_fault.detail.lower())
+
+        # Even if is_online was erroneously set to True, raw_status must override
+        res_override = get_irrigation_status(0.0, is_online=True, raw_status="probe_disconnected")
+        self.assertFalse(res_override.needs_water)
+        self.assertEqual(res_override.label, "Sensor Offline")
 
 
 class TestAiService(unittest.TestCase):

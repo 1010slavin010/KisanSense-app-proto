@@ -25,17 +25,31 @@ def get_irrigation_status(
     soil_moisture: float,
     farm_context: dict[str, Any] | None = None,
     is_online: bool = True,
+    raw_status: str = "ok",
 ) -> IrrigationStatus:
     """Decide whether irrigation is needed for a given soil moisture reading.
 
     Preserves backward compatibility for callers passing soil_moisture only,
     while permitting crop-aware messaging and offline telemetry safety.
     """
-    if not is_online:
+    is_fault = not is_online or raw_status in (
+        "probe_disconnected",
+        "sensor_fault",
+        "hardware_fault",
+        "wire_fault",
+        "adc_error",
+        "fault",
+    )
+    if is_fault:
+        fault_detail = (
+            "Soil moisture probe is disconnected or reporting a hardware fault. Please verify physical wiring before irrigating."
+            if raw_status == "probe_disconnected"
+            else "Soil moisture probe signal is unavailable. Please verify physical sensor connection before irrigating."
+        )
         return IrrigationStatus(
             needs_water=False,
             label="Sensor Offline",
-            detail="Soil moisture probe signal is unavailable. Please verify physical sensor connection before irrigating.",
+            detail=fault_detail,
             status_type="warning",
         )
 
