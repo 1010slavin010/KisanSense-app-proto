@@ -167,6 +167,51 @@ class TestAppFlow(unittest.TestCase):
         self.assertEqual(profile["location"], "Pune, Maharashtra")
 
 
+    def test_home_simulation_conditions(self):
+        at = AppTest.from_file(APP_PATH).run()
+        self.assertFalse(at.exception)
+
+        # Set DRY condition
+        at.session_state.sim_condition = "DRY"
+        at.session_state.sensor_reading = None
+        at.run()
+        self.assertFalse(at.exception)
+        # Should have a water needed warning
+        self.assertTrue(len(at.warning) > 0)
+        self.assertIn("Irrigation is advised", at.warning[0].value)
+
+        # Set SENSOR_OFFLINE condition
+        at.session_state.sim_condition = "SENSOR_OFFLINE"
+        at.session_state.sensor_reading = None
+        at.run()
+        self.assertFalse(at.exception)
+        # Should have an offline error alert
+        self.assertTrue(len(at.error) > 0)
+        self.assertIn("offline", at.error[0].value.lower())
+
+    def test_chatbot_telemetry_queries(self):
+        at = AppTest.from_file(APP_PATH).run()
+        self.assertFalse(at.exception)
+
+        # 1. Query online sensor status
+        at.session_state.sim_condition = "NORMAL"
+        at.session_state.sensor_reading = None
+        at.run()
+        at.chat_input[0].set_value("Is my sensor working?").run()
+        self.assertFalse(at.exception)
+        reply = at.session_state.chat_messages[-1]["content"]
+        self.assertIn("online", reply.lower())
+
+        # 2. Query with offline sensor
+        at.session_state.sim_condition = "SENSOR_OFFLINE"
+        at.session_state.sensor_reading = None
+        at.run()
+        at.chat_input[0].set_value("Should I water my plants?").run()
+        self.assertFalse(at.exception)
+        reply_offline = at.session_state.chat_messages[-1]["content"]
+        self.assertIn("offline", reply_offline.lower())
+
+
 if __name__ == "__main__":
     unittest.main()
 

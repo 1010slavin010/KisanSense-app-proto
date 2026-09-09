@@ -38,6 +38,8 @@ def init_session_state() -> None:
         st.session_state.chat_messages = []
     if "lang" not in st.session_state:
         st.session_state.lang = DEFAULT_LANG
+    if "sim_condition" not in st.session_state:
+        st.session_state.sim_condition = "NORMAL"
     init_farm_profile()
 
 

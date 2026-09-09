@@ -8,8 +8,6 @@ automatic fallback to English if a key is not found in the selected locale.
 
 from __future__ import annotations
 
-from typing import Any
-
 DEFAULT_LANG = "en"
 
 SUPPORTED_LANGUAGES: dict[str, str] = {
@@ -39,15 +37,28 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # Metric cards
         "card_soil_title": "Soil Moisture",
         "card_temp_title": "Temperature",
+        "card_humidity_title": "Air Humidity",
         "card_irrigation_title": "Irrigation",
         "card_soil_desc": "Based on the latest reading from your farm's soil sensor.",
         "card_temp_desc": "Comfortable range for most crops is 15°C to 35°C.",
+        "card_humidity_desc": "Ambient relative humidity around the crop canopy.",
         # Status labels
         "status_low": "Low",
         "status_good": "Good",
         "status_wet": "Wet",
         "status_normal": "Normal",
         "status_high": "High",
+        # Sensor connectivity & simulation
+        "sensor_online_label": "Sensor Online (Simulated)",
+        "sensor_offline_label": "Sensor Offline",
+        "sensor_last_updated": "Updated at",
+        "alert_sensor_offline": "Soil moisture probe signal is offline. Verify device power and connection.",
+        "sim_condition_label": "Sensor Simulation Environment",
+        "sim_normal": "Normal Field Conditions",
+        "sim_dry": "Dry Soil (Drought Alert)",
+        "sim_wet": "Wet Soil (Post-Rain)",
+        "sim_hot": "Heatwave Conditions",
+        "sim_offline": "Sensor Offline / Disconnected",
         # Irrigation status
         "irrigation_water_needed": "Water Needed",
         "irrigation_not_required": "Not Required",
@@ -105,15 +116,28 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # Metric cards
         "card_soil_title": "मिट्टी की नमी",
         "card_temp_title": "तापमान",
+        "card_humidity_title": "हवा की नमी",
         "card_irrigation_title": "सिंचाई स्थिति",
         "card_soil_desc": "आपके खेत के मिट्टी सेंसर से ताज़ा रीडिंग।",
         "card_temp_desc": "अधिकांश फसलों के लिए 15°C से 35°C अनुकूल तापमान है।",
+        "card_humidity_desc": "फसल के आसपास की सापेक्ष वायु आर्द्रता।",
         # Status labels
         "status_low": "कम",
         "status_good": "उत्तम",
         "status_wet": "अधिक गीला",
         "status_normal": "सामान्य",
         "status_high": "अधिक",
+        # Sensor connectivity & simulation
+        "sensor_online_label": "सेंसर ऑनलाइन (सिम्युलेटेड)",
+        "sensor_offline_label": "सेंसर ऑफलाइन",
+        "sensor_last_updated": "अंतिम अपडेट",
+        "alert_sensor_offline": "मिट्टी नमी सेंसर ऑफलाइन है। कृपया डिवाइस पावर और वायरिंग कनेक्शन की जांच करें।",
+        "sim_condition_label": "सेंसर सिम्युलेशन वातावरण",
+        "sim_normal": "सामान्य खेत स्थिति",
+        "sim_dry": "सूखी मिट्टी (सूखा चेतावनी)",
+        "sim_wet": "गीली मिट्टी (बारिश के बाद)",
+        "sim_hot": "अत्यधिक गर्मी / लू स्थिति",
+        "sim_offline": "सेंसर डिस्कनेक्ट / ऑफलाइन",
         # Irrigation status
         "irrigation_water_needed": "पानी आवश्यक",
         "irrigation_not_required": "आवश्यक नहीं",
@@ -171,15 +195,28 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # Metric cards
         "card_soil_title": "மண் ஈரப்பதம்",
         "card_temp_title": "வெப்பநிலை",
+        "card_humidity_title": "காற்றின் ஈரப்பதம்",
         "card_irrigation_title": "நீர்ப்பாசனம்",
         "card_soil_desc": "உங்கள் பண்ணை சென்சாரின் சமீபத்திய அளவீடு.",
         "card_temp_desc": "பெரும்பாலான பயிர்களுக்கு 15°C முதல் 35°C வரை சிறந்தது.",
+        "card_humidity_desc": "பயிரைச் சுற்றியுள்ள காற்றின் ஈரப்பதம்.",
         # Status labels
         "status_low": "குறைவு",
         "status_good": "நன்று",
         "status_wet": "அதிக ஈரம்",
         "status_normal": "இயல்பு",
         "status_high": "அதிகம்",
+        # Sensor connectivity & simulation
+        "sensor_online_label": "சென்சார் இணைப்பில் உள்ளது (உருவகப்படுத்தப்பட்டது)",
+        "sensor_offline_label": "சென்சார் ஆஃப்லைன்",
+        "sensor_last_updated": "கடைசி புதுப்பிப்பு",
+        "alert_sensor_offline": "மண் ஈரப்பத சென்சார் ஆஃப்லைனில் உள்ளது. சாதன இணைப்பைச் சரிபார்க்கவும்.",
+        "sim_condition_label": "சென்சார் உருவகப்படுத்துதல் சூழல்",
+        "sim_normal": "சாதாரண பண்ணை நிலை",
+        "sim_dry": "வறண்ட மண் (வறட்சி எச்சரிக்கை)",
+        "sim_wet": "ஈரமான மண் (மழைக்குப் பின்)",
+        "sim_hot": "அதிக வெப்ப நிலை",
+        "sim_offline": "சென்சார் துண்டிக்கப்பட்டது / ஆஃப்லைன்",
         # Irrigation status
         "irrigation_water_needed": "தண்ணீர் தேவை",
         "irrigation_not_required": "தேவையில்லை",
@@ -237,15 +274,28 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         # Metric cards
         "card_soil_title": "ಮಣ್ಣಿನ ತೇವಾಂಶ",
         "card_temp_title": "ತಾಪಮಾನ",
+        "card_humidity_title": "ಗಾಳಿಯ ತೇವಾಂಶ",
         "card_irrigation_title": "ನೀರಾವರಿ ಸ್ಥಿತಿ",
         "card_soil_desc": "ನಿಮ್ಮ ಜಮೀನಿನ ಸಂವೇದಕದಿಂದ ಇತ್ತೀಚಿನ ಮಾಹಿತಿ.",
         "card_temp_desc": "ಹೆಚ್ಚಿನ ಬೆಳೆಗಳಿಗೆ 15°C ನಿಂದ 35°C ಸೂಕ್ತ ತಾಪಮಾನ.",
+        "card_humidity_desc": "ಬೆಳೆಯ ಸುತ್ತಲಿನ ಗಾಳಿಯ ಸಾಪೇಕ್ಷ ತೇವಾಂಶ.",
         # Status labels
         "status_low": "ಕಡಿಮೆ",
         "status_good": "ಉತ್ತಮ",
         "status_wet": "ಹೆಚ್ಚು ತೇವ",
         "status_normal": "ಸಾಮಾನ್ಯ",
         "status_high": "ಹೆಚ್ಚು",
+        # Sensor connectivity & simulation
+        "sensor_online_label": "ಸಂವೇದಕ ಆನ್‌ಲೈನ್‌ನಲ್ಲಿದೆ (ಅನುಕರಿಸಲಾಗಿದೆ)",
+        "sensor_offline_label": "ಸಂವೇದಕ ಆಫ್‌ಲೈನ್",
+        "sensor_last_updated": "ಕೊನೆಯ ನವೀಕರಣ",
+        "alert_sensor_offline": "ಮಣ್ಣಿನ ತೇವಾಂಶ ಸಂವೇದಕ ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿದೆ. ಸಾಧನದ ಪವರ್ ಮತ್ತು ವೈರಿಂಗ್ ಪರಿಶೀಲಿಸಿ.",
+        "sim_condition_label": "ಸಂವೇದಕ ಅನುಕರಣೆ ಪರಿಸರ",
+        "sim_normal": "ಸಾಮಾನ್ಯ ಕೃಷಿ ಸ್ಥಿತಿ",
+        "sim_dry": "ಒಣ ಮಣ್ಣು (ಬರ ಎಚ್ಚರಿಕೆ)",
+        "sim_wet": "ತೇವಾಂಶದ ಮಣ್ಣು (ಮಳೆಯ ನಂತರ)",
+        "sim_hot": "ತೀವ್ರ ತಾಪಮಾನ ಸ್ಥಿತಿ",
+        "sim_offline": "ಸಂವೇದಕ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ / ಆಫ್‌ಲೈನ್",
         # Irrigation status
         "irrigation_water_needed": "ನೀರು ಅಗತ್ಯವಿದೆ",
         "irrigation_not_required": "ಅಗತ್ಯವಿಲ್ಲ",

@@ -2,8 +2,11 @@
 
 Conversation history lives in st.session_state (initialized in
 app.py) so it persists for the browser session. Responses come from
-services/ai_service.py with active farm context injected into context.
+services/ai_service.py with active farm context and live sensor telemetry
+injected into context.
 """
+
+from __future__ import annotations
 
 import streamlit as st
 
@@ -33,6 +36,16 @@ def render_chatbot() -> None:
 
         farm_ctx = get_farm_context()
         context = {"page": "home", **farm_ctx}
+
+        if "sensor_reading" in st.session_state:
+            reading = st.session_state.sensor_reading
+            context["soil_moisture"] = getattr(reading, "soil_moisture", None)
+            context["temperature"] = getattr(reading, "temperature", None)
+            context["humidity"] = getattr(reading, "humidity", None)
+            context["sensor_online"] = getattr(reading, "is_online", True)
+            context["last_updated"] = getattr(reading, "last_updated", "")
+            context["sensor_condition"] = getattr(reading, "condition", "NORMAL")
+
         response = get_ai_response(prompt, context=context)
 
         st.session_state.chat_messages.append({"role": "assistant", "content": response})

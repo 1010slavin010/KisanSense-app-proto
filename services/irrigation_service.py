@@ -1,8 +1,8 @@
 """Irrigation decision logic for KisanSense.
 
 Maintains a deterministic decision contract based on soil moisture thresholds
-while accepting optional farm context to prepare for advanced irrigation
-scheduling in subsequent phases.
+while accepting optional farm context and hardware online/offline status to
+protect farmers from erroneous automated watering when telemetry is down.
 """
 
 from __future__ import annotations
@@ -22,13 +22,23 @@ class IrrigationStatus:
 
 
 def get_irrigation_status(
-    soil_moisture: float, farm_context: dict[str, Any] | None = None
+    soil_moisture: float,
+    farm_context: dict[str, Any] | None = None,
+    is_online: bool = True,
 ) -> IrrigationStatus:
     """Decide whether irrigation is needed for a given soil moisture reading.
 
     Preserves backward compatibility for callers passing soil_moisture only,
-    while permitting crop-aware messaging when farm_context is supplied.
+    while permitting crop-aware messaging and offline telemetry safety.
     """
+    if not is_online:
+        return IrrigationStatus(
+            needs_water=False,
+            label="Sensor Offline",
+            detail="Soil moisture probe signal is unavailable. Please verify physical sensor connection before irrigating.",
+            status_type="warning",
+        )
+
     crop_name = ""
     if farm_context and isinstance(farm_context, dict):
         crop_name = farm_context.get("crop", "").strip()
@@ -39,19 +49,19 @@ def get_irrigation_status(
         return IrrigationStatus(
             needs_water=True,
             label="Water Needed",
-            detail=f"Soil moisture is low for healthy {subject}.",
+            detail=f"Soil moisture is low ({soil_moisture:.0f}%) for healthy {subject}.",
             status_type="alert",
         )
     if soil_moisture <= SOIL_MOISTURE_HIGH:
         return IrrigationStatus(
             needs_water=False,
             label="Not Required",
-            detail=f"Soil moisture is within a healthy range for {subject}.",
+            detail=f"Soil moisture ({soil_moisture:.0f}%) is within a healthy range for {subject}.",
             status_type="good",
         )
     return IrrigationStatus(
         needs_water=False,
         label="Not Required",
-        detail="Soil is already sufficiently wet.",
+        detail=f"Soil is already sufficiently wet ({soil_moisture:.0f}%).",
         status_type="warning",
     )
