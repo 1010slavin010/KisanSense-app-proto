@@ -1,16 +1,15 @@
-"""KisanSense — Phase 1 entry point.
+"""KisanSense — Main application entry point.
 
-Handles page configuration, global styling, and session-state-based
-navigation between pages.
-
-The project intentionally uses views/ instead of Streamlit's special
-pages/ directory so the custom top navigation remains in control.
+Handles page configuration, global styling, session-state initialization,
+and navigation between pages while preserving top navbar control.
 """
 
 import streamlit as st
 
 from components.navbar import render_navbar
+from services.farm_service import init_farm_profile
 from utils.config import APP_NAME, PAGE_ICON
+from utils.translations import DEFAULT_LANG
 from views import alerts, assistance, farm, home, irrigation, vision
 
 PAGES = {
@@ -37,6 +36,9 @@ def init_session_state() -> None:
         st.session_state.page = "home"
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = []
+    if "lang" not in st.session_state:
+        st.session_state.lang = DEFAULT_LANG
+    init_farm_profile()
 
 
 def main() -> None:

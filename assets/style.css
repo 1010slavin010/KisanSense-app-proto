@@ -249,3 +249,19 @@ footer { visibility: hidden; }
   .navbar-brand { font-size: 1.25rem; }
   .block-container { padding-top: 1.5rem; }
 }
+
+/* Forms and Action Buttons */
+.stFormSubmitButton > button {
+  background-color: var(--color-primary) !important;
+  color: #FFFFFF !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.6rem 1.5rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  transition: background-color 0.2s ease;
+}
+
+.stFormSubmitButton > button:hover {
+  background-color: #16433b !important;
+}
+

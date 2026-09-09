@@ -2,13 +2,13 @@
 
 Conversation history lives in st.session_state (initialized in
 app.py) so it persists for the browser session. Responses come from
-services/ai_service.py, a mock implementation in Phase 1 and the
-intended integration point for a real LLM later.
+services/ai_service.py with active farm context injected into context.
 """
 
 import streamlit as st
 
 from services.ai_service import get_ai_response
+from services.farm_service import get_farm_context
 from utils.translations import t
 
 
@@ -28,6 +28,13 @@ def render_chatbot() -> None:
     prompt = st.chat_input(t("assistant_placeholder"))
     if prompt:
         st.session_state.chat_messages.append({"role": "user", "content": prompt})
-        response = get_ai_response(prompt, context={"page": "home"})
+        with st.chat_message("user"):
+            st.write(prompt)
+
+        farm_ctx = get_farm_context()
+        context = {"page": "home", **farm_ctx}
+        response = get_ai_response(prompt, context=context)
+
         st.session_state.chat_messages.append({"role": "assistant", "content": response})
-        st.rerun()
+        with st.chat_message("assistant", avatar="🌾"):
+            st.write(response)
