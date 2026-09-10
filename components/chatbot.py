@@ -19,14 +19,19 @@ from utils.translations import t
 def render_chatbot(
     reading: Any | None = None,
     farm_context: dict[str, Any] | None = None,
+    show_header: bool = True,
 ) -> None:
-    st.markdown(
-        f'<div style="margin-top: 0.5rem; margin-bottom: 0.75rem;">'
-        f'<div class="assistant-title">🤖 {t("assistant_title")}</div>'
-        f'<p class="assistant-subtitle">{t("assistant_subtitle")}</p>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
+    if show_header:
+        st.markdown(
+            f'<div class="assistant-panel-header">'
+            f'<div class="assistant-header-icon">🤖</div>'
+            f'<div class="assistant-header-text">'
+            f'<div class="assistant-title">{t("assistant_title")}</div>'
+            f'<p class="assistant-subtitle">{t("assistant_subtitle")}</p>'
+            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
     if not st.session_state.chat_messages:
         with st.chat_message("assistant", avatar="🌾"):

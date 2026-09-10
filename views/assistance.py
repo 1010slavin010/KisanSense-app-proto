@@ -55,10 +55,10 @@ def render() -> None:
     # Suggested question chips
     chip_cols = st.columns(4)
     chips = [
-        (chip_cols[0], "🌾 " + t("home_chip_water"), "Should I water my crop?"),
-        (chip_cols[1], "🌱 " + t("home_chip_soil"), "How is my soil?"),
-        (chip_cols[2], "💡 " + t("home_chip_today"), "What should I do today?"),
-        (chip_cols[3], "🌿 " + t("home_chip_stress"), "Is my crop under stress?"),
+        (chip_cols[0], t("home_chip_water"), "Should I water my crop?"),
+        (chip_cols[1], t("home_chip_soil"), "How is my soil?"),
+        (chip_cols[2], t("home_chip_today"), "What should I do today?"),
+        (chip_cols[3], t("home_chip_stress"), "Is my crop under stress?"),
     ]
 
     for col, label, query in chips:
@@ -81,4 +81,4 @@ def render() -> None:
                 st.rerun()
 
     # Render Assistant Chatbot
-    render_chatbot(reading=reading, farm_context=farm_ctx)
+    render_chatbot(reading=reading, farm_context=farm_ctx, show_header=False)

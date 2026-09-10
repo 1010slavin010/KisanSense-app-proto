@@ -537,46 +537,50 @@ def render() -> None:
     # -------------------------------------------------------------------------
     # 6. KISANSENSE ASSISTANT (Chatbot on Home Page)
     # -------------------------------------------------------------------------
-    st.markdown(
-        f'<div style="margin-bottom: 0.5rem;">'
-        f'<div class="assistant-title">🤖 KisanSense Assistant</div>'
-        f'<p class="assistant-subtitle">Ask about your farm, crop, irrigation or current conditions.</p>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
+    with st.container(key="home_assistant_panel"):
+        st.markdown(
+            f'<div class="assistant-panel-header">'
+            f'<div class="assistant-header-icon">🤖</div>'
+            f'<div class="assistant-header-text">'
+            f'<div class="assistant-title">{t("assistant_title")}</div>'
+            f'<p class="assistant-subtitle">{t("assistant_subtitle")}</p>'
+            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
-    # 4 Clean Suggested Prompt Chips
-    chip_cols = st.columns(4)
-    chips = [
-        (chip_cols[0], "🌾 " + t("home_chip_water"), "Should I water my crop?"),
-        (chip_cols[1], "🌱 " + t("home_chip_soil"), "How is my soil?"),
-        (chip_cols[2], "💡 " + t("home_chip_today"), "What should I do today?"),
-        (chip_cols[3], "🌿 " + t("home_chip_stress"), "Is my crop under stress?"),
-    ]
+        # 4 Clean Compact Suggested Prompt Chips
+        chip_cols = st.columns(4)
+        chips = [
+            (chip_cols[0], t("home_chip_water"), "Should I water my crop?"),
+            (chip_cols[1], t("home_chip_soil"), "How is my soil?"),
+            (chip_cols[2], t("home_chip_today"), "What should I do today?"),
+            (chip_cols[3], t("home_chip_stress"), "Is my crop under stress?"),
+        ]
 
-    for col, label, query in chips:
-        with col:
-            if st.button(label, key=f"chip_home_{query[:8]}", use_container_width=True):
-                st.session_state.chat_messages.append({"role": "user", "content": query})
-                ctx = {
-                    "page": "home",
-                    **farm_ctx,
-                    "reading": reading,
-                    "soil_moisture": reading.soil_moisture,
-                    "temperature": reading.temperature,
-                    "humidity": reading.humidity,
-                    "sensor_online": reading.is_online,
-                    "last_updated": reading.last_updated,
-                    "intelligence": intel,
-                    "vision_result": latest_vision,
-                    "weather": weather_snap,
-                }
-                reply = get_ai_response(query, context=ctx)
-                st.session_state.chat_messages.append({"role": "assistant", "content": reply})
-                st.rerun()
+        for col, label, query in chips:
+            with col:
+                if st.button(label, key=f"chip_home_{query[:8]}", use_container_width=True):
+                    st.session_state.chat_messages.append({"role": "user", "content": query})
+                    ctx = {
+                        "page": "home",
+                        **farm_ctx,
+                        "reading": reading,
+                        "soil_moisture": reading.soil_moisture,
+                        "temperature": reading.temperature,
+                        "humidity": reading.humidity,
+                        "sensor_online": reading.is_online,
+                        "last_updated": reading.last_updated,
+                        "intelligence": intel,
+                        "vision_result": latest_vision,
+                        "weather": weather_snap,
+                    }
+                    reply = get_ai_response(query, context=ctx)
+                    st.session_state.chat_messages.append({"role": "assistant", "content": reply})
+                    st.rerun()
 
-    # Chatbot Component
-    render_chatbot(reading=reading, farm_context=farm_ctx)
+        # Chatbot Component inside the Assistant Panel
+        render_chatbot(reading=reading, farm_context=farm_ctx, show_header=False)
 
     # -------------------------------------------------------------------------
     # 7. TELEMETRY & SIMULATION CONTROLS (Collapsible)

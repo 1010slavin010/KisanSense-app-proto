@@ -116,10 +116,10 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "irrigation_detail_good": "Soil moisture is within a healthy range.",
         "irrigation_detail_wet": "Soil is already sufficiently wet.",
         # Assistant / Chatbot
-        "assistant_title": "Ask KisanSense",
-        "assistant_subtitle": "Get simple advice about your crops, soil and irrigation.",
+        "assistant_title": "KisanSense Assistant",
+        "assistant_subtitle": "Ask about your farm, crops or current conditions.",
         "assistant_welcome": "How can I help with your farm today?",
-        "assistant_placeholder": "Ask about soil, crops or irrigation...",
+        "assistant_placeholder": "Type your question...",
         # Farm Profile Page
         "farm_title": "Farm Profile",
         "farm_subtitle": "Provide your farm details to get personalized recommendations across KisanSense.",
@@ -335,10 +335,10 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "irrigation_detail_good": "नमी का स्तर अनुकूल और संतुलित है।",
         "irrigation_detail_wet": "मिट्टी पहले से ही पर्याप्त नम है।",
         # Assistant / Chatbot
-        "assistant_title": "किसानसेंस से पूछें",
-        "assistant_subtitle": "अपनी फसल, मिट्टी और सिंचाई पर सरल सलाह पाएं।",
+        "assistant_title": "किसानसेंस सहायक",
+        "assistant_subtitle": "अपने खेत, फसलों या वर्तमान स्थितियों के बारे में पूछें।",
         "assistant_welcome": "आज मैं आपके खेत की क्या मदद कर सकता हूँ?",
-        "assistant_placeholder": "मिट्टी, फसल या सिंचाई के बारे में पूछें...",
+        "assistant_placeholder": "अपना प्रश्न लिखें...",
         # Farm Profile Page
         "farm_title": "खेत प्रोफ़ाइल",
         "farm_subtitle": "निजीकृत सुझावों के लिए अपने खेत का विवरण दर्ज करें।",
@@ -554,10 +554,10 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "irrigation_detail_good": "மண் ஈரப்பதம் ஆரோக்கியமான வரம்பில் உள்ளது.",
         "irrigation_detail_wet": "மண் போதுமான அளவு ஈரப்பதமாக உள்ளது.",
         # Assistant / Chatbot
-        "assistant_title": "கிசான்சென்ஸிடம் கேளுங்கள்",
-        "assistant_subtitle": "உங்கள் பயிர், மண் மற்றும் நீர்ப்பாசனம் குறித்து எளிய ஆலோசனை பெறுங்கள்.",
+        "assistant_title": "கிசான்சென்ஸ் உதவியாளர்",
+        "assistant_subtitle": "உங்கள் பண்ணை, பயிர்கள் அல்லது தற்போதைய நிலைகள் பற்றி கேளுங்கள்.",
         "assistant_welcome": "இன்று உங்கள் பண்ணைக்கு நான் எவ்வாறு உதவ முடியும்?",
-        "assistant_placeholder": "மண், பயிர்கள் அல்லது பாசனம் பற்றி கேளுங்கள்...",
+        "assistant_placeholder": "உங்கள் கேள்வியை தட்டச்சு செய்யவும்...",
         # Farm Profile Page
         "farm_title": "பண்ணை விவரம்",
         "farm_subtitle": "துல்லியமான பரிந்துரைகளுக்கு உங்கள் பண்ணை விவரங்களை உள்ளிடவும்.",
@@ -773,10 +773,10 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "irrigation_detail_good": "ಮಣ್ಣಿನ ತೇವಾಂಶ ಸಮತೋಲನದಲ್ಲಿದೆ.",
         "irrigation_detail_wet": "ಮಣ್ಣಿನಲ್ಲಿ ಈಗಾಗಲೇ ಸಾಕಷ್ಟು ತೇವಾಂಶವಿದೆ.",
         # Assistant / Chatbot
-        "assistant_title": "ಕಿಸಾನ್‌ಸೆನ್ಸ್ ಬಳಿ ಕೇಳಿ",
-        "assistant_subtitle": "ಬೆಳೆ, ಮಣ್ಣು ಮತ್ತು ನೀರಾವರಿ ಬಗ್ಗೆ ಸರಳ ಸಲಹೆ ಪಡೆಯಿರಿ.",
+        "assistant_title": "ಕಿಸಾನ್‌ಸೆನ್ಸ್ ಸಹಾಯಕ",
+        "assistant_subtitle": "ನಿಮ್ಮ ಜಮೀನು, ಬೆಳೆಗಳು ಅಥವಾ ಪ್ರಸ್ತುತ ಪರಿಸ್ಥಿತಿಗಳ ಬಗ್ಗೆ ಕೇಳಿ.",
         "assistant_welcome": "ಇಂದು ನಿಮ್ಮ ಜಮೀನಿಗೆ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
-        "assistant_placeholder": "ಮಣ್ಣು, ಬೆಳೆ ಅಥವಾ ನೀರಾವರಿ ಬಗ್ಗೆ ಕೇಳಿ...",
+        "assistant_placeholder": "ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ...",
         # Farm Profile Page
         "farm_title": "ಕೃಷಿ ವಿವರ",
         "farm_subtitle": "ನಿಖರವಾದ ಸಲಹೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಜಮೀನಿನ ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ.",
