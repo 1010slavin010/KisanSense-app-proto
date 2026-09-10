@@ -23,13 +23,18 @@ def _on_lang_change() -> None:
         st.session_state.lang = selected
 
 
+def _toggle_theme() -> None:
+    current = st.session_state.get("theme", "light")
+    st.session_state.theme = "dark" if current == "light" else "light"
+
+
 def render_navbar(current_page: str) -> None:
-    cols = st.columns([1.8, 1, 1.1, 1.1, 1, 1.1, 1, 1.4])
+    cols = st.columns([1.5, 0.85, 0.85, 0.9, 0.85, 0.85, 0.9, 0.85, 1.25, 1.05])
 
     with cols[0]:
         st.markdown(f'<div class="navbar-brand">{APP_NAME}</div>', unsafe_allow_html=True)
 
-    for col, (key, _default_label) in zip(cols[1:7], NAV_ITEMS):
+    for col, (key, _default_label) in zip(cols[1:8], NAV_ITEMS):
         with col:
             label = t(f"nav_{key}")
             st.button(
@@ -41,7 +46,7 @@ def render_navbar(current_page: str) -> None:
                 use_container_width=True,
             )
 
-    with cols[7]:
+    with cols[8]:
         lang_keys = list(SUPPORTED_LANGUAGES.keys())
         current_lang = st.session_state.get("lang", DEFAULT_LANG)
         curr_idx = lang_keys.index(current_lang) if current_lang in lang_keys else 0
@@ -53,6 +58,18 @@ def render_navbar(current_page: str) -> None:
             key="lang_selector",
             on_change=_on_lang_change,
             label_visibility="collapsed",
+        )
+
+    with cols[9]:
+        current_theme = st.session_state.get("theme", "light")
+        theme_icon = "🌙" if current_theme == "light" else "☀️"
+        theme_target_label = t("theme_dark") if current_theme == "light" else t("theme_light")
+        st.button(
+            f"{theme_icon} {theme_target_label}",
+            key="btn_theme_toggle",
+            help=t("theme_toggle_help"),
+            on_click=_toggle_theme,
+            use_container_width=True,
         )
 
     st.markdown('<hr class="navbar-divider" />', unsafe_allow_html=True)

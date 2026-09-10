@@ -20,6 +20,7 @@ TEMP_NORMAL_MAX = 35
 NAV_ITEMS = [
     ("home", "Home"),
     ("farm", "Farm"),
+    ("weather", "Weather"),
     ("irrigation", "Irrigation"),
     ("vision", "Vision"),
     ("assistant", "Assistant"),

@@ -22,6 +22,7 @@ class TestTranslations(unittest.TestCase):
         required_keys = [
             "nav_home",
             "nav_farm",
+            "nav_weather",
             "nav_irrigation",
             "nav_vision",
             "nav_assistant",

@@ -57,7 +57,7 @@ class TestAppFlow(unittest.TestCase):
         at = AppTest.from_file(APP_PATH).run()
         self.assertFalse(at.exception)
 
-        pages = ["farm", "irrigation", "vision", "assistant", "alerts", "home"]
+        pages = ["farm", "weather", "irrigation", "vision", "assistant", "alerts", "home"]
         for page in pages:
             at.button(key=f"nav_{page}").click().run()
             self.assertFalse(at.exception, f"Error navigating to {page}")

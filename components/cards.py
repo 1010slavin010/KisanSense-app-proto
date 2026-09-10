@@ -34,15 +34,16 @@ def render_metric_card(
             "</div>"
         )
 
-    st.markdown(
-        f"""
-        <div class="metric-card metric-card-{status_type}">
-            <div class="metric-card-title">{title}</div>
-            <div class="metric-card-value">{value}</div>
-            {badge_html}
-            {progress_html}
-            <p class="metric-card-description">{description}</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    elements = [
+        f'<div class="metric-card metric-card-{status_type}">',
+        f'<div class="metric-card-title">{title}</div>',
+        f'<div class="metric-card-value">{value}</div>',
+    ]
+    if badge_html:
+        elements.append(badge_html)
+    if progress_html:
+        elements.append(progress_html)
+    elements.append(f'<p class="metric-card-description">{description}</p>')
+    elements.append('</div>')
+
+    st.markdown("".join(elements), unsafe_allow_html=True)

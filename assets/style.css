@@ -265,3 +265,646 @@ footer { visibility: hidden; }
   background-color: #16433b !important;
 }
 
+/* ==========================================================================
+   SIH-Grade Home Dashboard UI Components
+   ========================================================================== */
+
+/* Farm Health Hero Card */
+.farm-health-hero {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.farm-health-hero-good {
+  border-left: 6px solid var(--color-good);
+  background: linear-gradient(135deg, var(--color-surface) 88%, #f0f7f2 100%);
+}
+
+.farm-health-hero-warning {
+  border-left: 6px solid var(--color-warning);
+  background: linear-gradient(135deg, var(--color-surface) 88%, #fff9f0 100%);
+}
+
+.farm-health-hero-alert {
+  border-left: 6px solid var(--color-alert);
+  background: linear-gradient(135deg, var(--color-surface) 88%, #fdf2ed 100%);
+}
+
+.farm-health-hero-critical {
+  border-left: 6px solid #991b1b;
+  background: linear-gradient(135deg, var(--color-surface) 88%, #fee2e2 100%);
+}
+
+.farm-health-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.farm-health-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.farm-health-badge {
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.32rem 0.85rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.farm-health-summary {
+  font-size: 1.02rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  margin-top: 0.35rem;
+  margin-bottom: 0.2rem;
+}
+
+/* Action Hero Card ("What Should I Do Now?") */
+.action-hero-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1.5rem;
+  border-top: 4px solid var(--color-primary);
+}
+
+.action-hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.action-hero-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.action-headline {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.45rem;
+}
+
+.action-explanation {
+  font-size: 0.98rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.action-secondary-box {
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.95rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.45;
+}
+
+/* Farm Conditions 3-Card Display */
+.condition-card-v2 {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.3rem 1.3rem 1.15rem 1.3rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.condition-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+.condition-card-label {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.condition-card-val-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.condition-card-num {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+.condition-card-desc {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Quick Farm Insights Grid */
+.insights-header {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.85rem;
+}
+
+.insight-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem;
+  box-shadow: 0 1px 3px rgba(35, 39, 31, 0.04);
+  height: 100%;
+}
+
+.insight-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.insight-body {
+  font-size: 0.92rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+/* Chatbot Section Header & Suggested Chips */
+.chatbot-container {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.6rem 1.6rem;
+  margin-top: 1.5rem;
+}
+
+.chips-label {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* =========================================================================
+   Crop Health / Vision Styles
+   ========================================================================= */
+
+.vision-header-title {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.2rem;
+}
+
+.vision-header-subtitle {
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.25rem;
+  line-height: 1.45;
+}
+
+.vision-context-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: 999px;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.vision-guidance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.vision-guidance-item {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 1px 2px rgba(35, 39, 31, 0.04);
+}
+
+.vision-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 1.5rem;
+}
+
+.vision-result-healthy {
+  border-left: 6px solid var(--color-good);
+  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-good-soft) 100%);
+}
+
+.vision-result-warning {
+  border-left: 6px solid var(--color-warning);
+  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-warning-soft) 100%);
+}
+
+.vision-result-rejected {
+  border-left: 6px solid var(--color-alert);
+  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-alert-soft) 100%);
+}
+
+.vision-badge-high {
+  display: inline-block;
+  background-color: var(--color-good-soft);
+  color: var(--color-good);
+  border: 1px solid var(--color-good);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.vision-badge-moderate {
+  display: inline-block;
+  background-color: var(--color-warning-soft);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.vision-badge-low {
+  display: inline-block;
+  background-color: var(--color-alert-soft);
+  color: var(--color-alert);
+  border: 1px solid var(--color-alert);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.vision-section-box {
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  margin-top: 1rem;
+}
+
+.vision-disclaimer {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--color-border);
+}
+
+/* =========================================================================
+   Weather & Climate Intelligence Styles (Phase 6)
+   ========================================================================= */
+
+.weather-header-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+}
+
+.weather-header-subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.weather-context-banner {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.2rem;
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-card);
+}
+
+.weather-badge-demo {
+  display: inline-block;
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.weather-metric-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 0.85rem;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.weather-metric-card:hover {
+  transform: translateY(-2px);
+}
+
+.weather-metric-label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.weather-metric-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.weather-metric-sub {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.weather-action-hero {
+  border-radius: var(--radius-lg);
+  padding: 1.3rem 1.5rem;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 1rem;
+}
+
+.weather-action-good {
+  border-left: 6px solid var(--color-good);
+  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-good-soft) 100%);
+}
+
+.weather-action-warning {
+  border-left: 6px solid var(--color-warning);
+  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-warning-soft) 100%);
+}
+
+.weather-action-alert {
+  border-left: 6px solid var(--color-alert);
+  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-alert-soft) 100%);
+}
+
+.weather-action-badge {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.weather-action-headline {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.45rem;
+}
+
+.weather-action-detail {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.weather-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 1.2rem 0 0.8rem 0;
+}
+
+.weather-impact-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.weather-impact-heading {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.35rem;
+}
+
+.weather-impact-body {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.forecast-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 0.85rem;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease;
+}
+
+.forecast-card:hover {
+  transform: translateY(-2px);
+}
+
+.forecast-day-header {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.35rem;
+}
+
+.forecast-condition-icon {
+  font-size: 2rem;
+  margin: 0.2rem 0;
+}
+
+.forecast-condition-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.forecast-temp-range {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.forecast-temp-max {
+  color: var(--color-text);
+}
+
+.forecast-temp-min {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.forecast-rain-pill {
+  display: inline-block;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.forecast-advisory-text {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+.weather-risk-banner {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 0.95rem 1.25rem;
+  margin-bottom: 0.75rem;
+  box-shadow: var(--shadow-card);
+}
+
+.risk-sev-alert {
+  border-left: 5px solid var(--color-alert);
+}
+
+.risk-sev-warning {
+  border-left: 5px solid var(--color-warning);
+}
+
+.risk-sev-info {
+  border-left: 5px solid var(--color-primary);
+}
+
+.weather-risk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.weather-risk-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.weather-risk-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background-color: var(--color-surface-alt);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.weather-risk-desc {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.weather-risk-mitigation {
+  font-size: 0.88rem;
+  color: var(--color-text);
+}
+
+.weather-no-risks-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  color: var(--color-good);
+  font-weight: 500;
+}
+
+.weather-assistant-box {
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.3rem;
+  margin-top: 0.5rem;
+}
+
+.home-weather-banner {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-card);
+}

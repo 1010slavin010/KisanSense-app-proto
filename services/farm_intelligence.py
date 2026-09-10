@@ -40,6 +40,7 @@ CATEGORY_WEIGHTS: dict[str, int] = {
     "hardware_safety": 50,
     "compound_risk": 40,
     "water_stress": 30,
+    "foliar_health": 25,
     "heat_stress": 20,
     "humidity_risk": 10,
 }
@@ -398,12 +399,14 @@ def _analyze_compound_conditions(
 def evaluate_farm_intelligence(
     reading: SensorReading,
     farm_context: dict[str, Any] | None = None,
+    vision_result: Any | None = None,
 ) -> FarmIntelligenceResult:
     """Evaluate farm conditions and generate an explainable intelligence assessment.
 
     Args:
         reading: Current SensorReading contract (from Simulator or Hardware).
         farm_context: Optional farm profile dict from services.farm_service.
+        vision_result: Optional VisionAnalysisResult contract from services.vision_service.
 
     Returns:
         Structured FarmIntelligenceResult.
@@ -496,11 +499,31 @@ def evaluate_farm_intelligence(
                 confidence="low",
             )
 
+        fail_safe_conditions = [cond]
+        # If a valid vision screening result exists, append as an advisory foliar condition
+        # while keeping sensor safety and irrigation fail-safe authoritative
+        if vision_result is not None and getattr(vision_result, "success", False) and not getattr(vision_result, "healthy", True):
+            fail_safe_conditions.append(
+                FarmCondition(
+                    category="foliar_health",
+                    code=vision_result.disease_code,
+                    severity="warning",
+                    title=f"Advisory: {vision_result.diagnosis}",
+                    explanation=(
+                        f"Visual screening noted possible leaf symptoms ({vision_result.diagnosis}). "
+                        "Field sensors are offline or untrustworthy, so automated environmental validation is suspended. "
+                        "Inspect foliage physically."
+                    ),
+                    recommended_action=vision_result.recommended_action,
+                    confidence=vision_result.confidence_level,
+                )
+            )
+
         return FarmIntelligenceResult(
             primary_status=primary_status,
             primary_severity=cond.severity,
             overall_summary=overall_summary,
-            conditions=[cond],
+            conditions=fail_safe_conditions,
             irrigation_status=safe_irrigation,
             data_quality=quality,
             data_quality_reasons=quality_reasons,
@@ -536,6 +559,102 @@ def evaluate_farm_intelligence(
                 confidence="high",
             )
         )
+
+    # Add plant vision screening condition and compound foliar risk if present
+    if vision_result is not None and getattr(vision_result, "success", False):
+        if not getattr(vision_result, "healthy", True):
+            urgency = getattr(vision_result, "treatment_urgency", "moderate")
+            foliar_sev = "alert" if urgency == "immediate" else "warning"
+            all_conditions.append(
+                FarmCondition(
+                    category="foliar_health",
+                    code=vision_result.disease_code,
+                    severity=foliar_sev,
+                    title=f"Foliar Health: {vision_result.diagnosis}",
+                    explanation=vision_result.explanation,
+                    recommended_action=vision_result.recommended_action,
+                    confidence=vision_result.confidence_level,
+                )
+            )
+
+            # Compound foliar risk A: Elevated humidity + foliar pathogen
+            if reading.humidity > 75.0 and (
+                getattr(vision_result, "category", "") == "fungal"
+                or "blight" in vision_result.disease_code.lower()
+                or "spot" in vision_result.disease_code.lower()
+            ):
+                all_conditions.append(
+                    FarmCondition(
+                        category="compound_risk",
+                        code="COMPOUND_FUNGAL_HUMIDITY",
+                        severity="alert",
+                        title="Elevated Foliar Disease Risk",
+                        explanation=(
+                            f"High canopy humidity ({reading.humidity:.0f}%) may favor further foliar disease development "
+                            f"consistent with {vision_result.diagnosis}."
+                        ),
+                        recommended_action=(
+                            "Inspect affected plants physically, improve canopy ventilation, and avoid unnecessary overhead watering."
+                        ),
+                        confidence="high",
+                    )
+                )
+
+            # Compound foliar risk B: Low soil moisture + chlorosis
+            if reading.soil_moisture < 30.0 and (
+                vision_result.disease_code == "NUTRIENT_CHLOROSIS"
+                or getattr(vision_result, "category", "") == "abiotic_stress"
+            ):
+                all_conditions.append(
+                    FarmCondition(
+                        category="compound_risk",
+                        code="COMPOUND_DRY_CHLOROSIS",
+                        severity="warning",
+                        title="Foliar Yellowing with Soil Moisture Deficit",
+                        explanation=(
+                            f"Leaf yellowing is present along with low soil moisture ({reading.soil_moisture:.0f}%). "
+                            "Visual signs are consistent with moisture or nutrient stress."
+                        ),
+                        recommended_action=(
+                            "Check root-zone moisture before deciding on fertilizer or corrective treatments."
+                        ),
+                        confidence="moderate",
+                    )
+                )
+
+            # Compound foliar risk C: Saturated soil + chlorosis
+            if reading.soil_moisture > 70.0 and (
+                vision_result.disease_code == "NUTRIENT_CHLOROSIS"
+                or getattr(vision_result, "category", "") == "abiotic_stress"
+            ):
+                all_conditions.append(
+                    FarmCondition(
+                        category="compound_risk",
+                        code="COMPOUND_WET_CHLOROSIS",
+                        severity="warning",
+                        title="Foliar Yellowing with Saturated Soil",
+                        explanation=(
+                            f"Leaf yellowing is present with high soil moisture ({reading.soil_moisture:.0f}%). "
+                            "Excess moisture could indicate root stress or waterlogging."
+                        ),
+                        recommended_action=(
+                            "Do not add irrigation; inspect field drainage channels."
+                        ),
+                        confidence="moderate",
+                    )
+                )
+        else:
+            all_conditions.append(
+                FarmCondition(
+                    category="foliar_health",
+                    code="HEALTHY_FOLIAGE",
+                    severity="good",
+                    title=f"Foliar Health: {vision_result.diagnosis}",
+                    explanation=vision_result.explanation,
+                    recommended_action=vision_result.recommended_action,
+                    confidence=vision_result.confidence_level,
+                )
+            )
 
     # Sort conditions deterministically by severity weight, then category weight
     all_conditions.sort(
