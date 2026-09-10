@@ -1,12 +1,12 @@
 """Farm Analytics and Telemetry Trends page for KisanSense.
 
-Visualizes soil moisture trends, temperature/humidity dynamics,
-irrigation recommendation history, plant health scans, and link stability.
+Visualizes genuine soil moisture trends, temperature/humidity dynamics,
+and field connectivity uptime. Uses only actual session-stored telemetry observations.
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import streamlit as st
 
 from components.cards import render_metric_card
@@ -14,7 +14,6 @@ from components.status import render_status_dot
 from services.farm_service import get_farm_profile
 from services.sensor_service import MODE_HARDWARE, get_current_sensor_data
 from services.timeline_service import get_timeline_events
-from utils.helpers import format_percent, format_temperature
 from utils.translations import t
 
 
@@ -40,8 +39,8 @@ def _record_telemetry_point(reading) -> list[dict]:
                     "is_online": True,
                 }
             )
-            if len(hist) > 20:
-                st.session_state.telemetry_history = hist[-20:]
+            if len(hist) > 25:
+                st.session_state.telemetry_history = hist[-25:]
 
     return st.session_state.telemetry_history
 
@@ -71,72 +70,71 @@ def render() -> None:
         )
         st.markdown(
             f'<div class="status-dot-row" style="justify-content: flex-end;">'
-            f'<span class="status-dot" style="background-color: var(--color-good);"></span>'
-            f'<span class="status-dot-label">Analytics Stream: <strong>Active</strong> ({source_label})</span>'
+            f'<span class="status-dot status-dot-good"></span>'
+            f'<span>Telemetry Stream: <strong>Active</strong> ({source_label})</span>'
             f'</div>',
             unsafe_allow_html=True,
         )
 
     st.markdown('<div style="height: 0.5rem;"></div>', unsafe_allow_html=True)
 
-    # Overview KPI row
+    # 4 Overview KPI cards
     k1, k2, k3, k4 = st.columns(4)
     with k1:
         avg_sm = sum(p["soil_moisture"] for p in history) / len(history) if history else (reading.soil_moisture if reading.is_online else 0.0)
         render_metric_card(
-            title=f"🌱 {t('analytics_avg_moisture')}",
+            title=t("analytics_avg_moisture"),
             value=f"{avg_sm:.1f}%",
             status_type="good" if 30.0 <= avg_sm <= 60.0 else "warning",
             status_label="Balanced" if 30.0 <= avg_sm <= 60.0 else "Attention",
-            description="Mean over session observations.",
+            description="Mean observed soil moisture.",
             progress_fraction=avg_sm / 100,
         )
 
     with k2:
         avg_t = sum(p["temperature"] for p in history) / len(history) if history else (reading.temperature if reading.is_online else 0.0)
         render_metric_card(
-            title=f"🌡️ {t('analytics_avg_temp')}",
+            title=t("analytics_avg_temp"),
             value=f"{avg_t:.1f}°C",
             status_type="good" if 15.0 <= avg_t <= 35.0 else "warning",
-            status_label="Favorable" if 15.0 <= avg_t <= 35.0 else "High Heat",
-            description="Mean ambient canopy temperature.",
+            status_label="Favorable" if 15.0 <= avg_t <= 35.0 else "Elevated",
+            description="Mean canopy temperature.",
         )
 
     with k3:
         uptime_pct = 100.0 if reading.is_online else 0.0
         render_metric_card(
-            title=f"📡 {t('analytics_uptime')}",
-            value=f"{uptime_pct:.1f}%",
+            title=t("analytics_uptime"),
+            value=f"{uptime_pct:.0f}%",
             status_type="good" if reading.is_online else "alert",
-            status_label="Reliable" if reading.is_online else "Offline",
-            description="Field packet transmission rate.",
+            status_label="Online" if reading.is_online else "Offline",
+            description="Sensor packet transmission rate.",
             progress_fraction=1.0 if reading.is_online else 0.0,
         )
 
     with k4:
-        v_res = st.session_state.get("latest_vision_result", None)
-        scan_stat = "1 Active" if v_res else "None"
+        obs_count = len(history)
         render_metric_card(
-            title=f"📷 {t('analytics_scans')}",
-            value=scan_stat,
-            status_type="good" if (v_res and v_res.healthy) else ("warning" if v_res else "info"),
-            status_label=v_res.diagnosis if v_res else "No Scans",
-            description="Screening sessions in this visit.",
+            title="TELEMETRY READINGS",
+            value=f"{obs_count}",
+            status_type="info",
+            status_label="Logged",
+            description="Readings recorded in this session.",
         )
 
     st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
 
-    # Line Charts using Streamlit native line_chart
-    st.markdown(f'<div class="insights-header">📊 {t("analytics_trends_title")}</div>', unsafe_allow_html=True)
+    # Restrained Trends Charts
+    st.markdown(f'<div class="insights-header">📊 Telemetry Trends</div>', unsafe_allow_html=True)
     if len(history) >= 2:
         col_ch1, col_ch2 = st.columns(2)
 
         with col_ch1:
             st.markdown(
                 """
-                <div class="weather-metric-card" style="margin-bottom: 0.5rem;">
-                    <div style="font-weight: 700; font-size: 0.95rem;">🌱 Soil Moisture (%) vs. Time</div>
-                    <div style="font-size: 0.82rem; color: var(--color-text-muted);">Target range: 30% (Irrigate threshold) to 60% (Saturated cutoff).</div>
+                <div class="insight-card" style="margin-bottom: 0.5rem; padding: 0.65rem 0.85rem;">
+                    <div style="font-weight: 650; font-size: 0.9rem;">Soil Moisture Trend (%)</div>
+                    <div style="font-size: 0.8rem; color: var(--color-text-secondary);">Target: 30% (Irrigate threshold) to 60% (Saturated cutoff).</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -145,14 +143,14 @@ def render() -> None:
                 "Time": [p["time"] for p in history],
                 "Soil Moisture (%)": [p["soil_moisture"] for p in history],
             }
-            st.line_chart(chart_data, x="Time", y="Soil Moisture (%)", color="#3EA082")
+            st.line_chart(chart_data, x="Time", y="Soil Moisture (%)", color="#1F5C52")
 
         with col_ch2:
             st.markdown(
                 """
-                <div class="weather-metric-card" style="margin-bottom: 0.5rem;">
-                    <div style="font-weight: 700; font-size: 0.95rem;">🌡️ Temperature (°C) & Humidity (%) vs. Time</div>
-                    <div style="font-size: 0.82rem; color: var(--color-text-muted);">Ambient thermal and atmospheric moisture dynamics.</div>
+                <div class="insight-card" style="margin-bottom: 0.5rem; padding: 0.65rem 0.85rem;">
+                    <div style="font-weight: 650; font-size: 0.9rem;">Temperature (°C) & Humidity (%) Trend</div>
+                    <div style="font-size: 0.8rem; color: var(--color-text-secondary);">Canopy thermal and atmospheric moisture dynamics.</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -162,9 +160,9 @@ def render() -> None:
                 "Temperature (°C)": [p["temperature"] for p in history],
                 "Humidity (%)": [p["humidity"] for p in history],
             }
-            st.line_chart(chart_data_climate, x="Time", y=["Temperature (°C)", "Humidity (%)"], color=["#E5684A", "#4A90E2"])
+            st.line_chart(chart_data_climate, x="Time", y=["Temperature (°C)", "Humidity (%)"], color=["#C58A1A", "#3B6EA8"])
     else:
-        st.info(f"💡 {t('analytics_no_history')}")
+        st.info("Not enough telemetry data yet. As sensor readings are recorded over time, trends will plot automatically.")
 
     st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
 
@@ -173,17 +171,16 @@ def render() -> None:
     events = get_timeline_events(limit=6)
     if events:
         for evt in events:
-            b_class = f"badge-{evt.severity}" if evt.severity in ("good", "warning", "alert") else "badge-info"
             st.markdown(
                 f"""
                 <div class="home-weather-banner" style="margin-bottom: 0.4rem; padding: 0.6rem 0.9rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                         <div>
-                            <span style="font-size: 1.1rem; margin-right: 6px;">{evt.icon}</span>
-                            <span style="font-weight: 700; font-size: 0.92rem;">{evt.title}</span>
-                            <span style="color: var(--color-text-muted); font-size: 0.86rem; margin-left: 8px;">{evt.description}</span>
+                            <span style="font-size: 1.05rem; margin-right: 6px;">{evt.icon}</span>
+                            <span style="font-weight: 700; font-size: 0.9rem;">{evt.title}</span>
+                            <span style="color: var(--color-text-secondary); font-size: 0.86rem; margin-left: 8px;">— {evt.description}</span>
                         </div>
-                        <div style="font-size: 0.82rem; color: var(--color-text-muted);">
+                        <div style="font-size: 0.8rem; color: var(--color-text-muted);">
                             🕒 {evt.timestamp}
                         </div>
                     </div>
@@ -192,4 +189,4 @@ def render() -> None:
                 unsafe_allow_html=True,
             )
     else:
-        st.info("Not enough historical data yet. As telemetry streams and events are logged, activity trends will appear here.")
+        st.info("Not enough historical data yet. As events and telemetry are recorded, activity entries will appear here.")

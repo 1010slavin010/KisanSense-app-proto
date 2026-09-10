@@ -2,6 +2,7 @@
 
 Enables farmers to view, configure, and update their farm profile (farmer name,
 farm name, crop, growth stage, soil type, area, irrigation method, and location).
+Organized cleanly into Farmer Information, Crop Information, and Farm Details.
 All state persists in st.session_state.farm_profile across reruns and navigation.
 """
 
@@ -25,25 +26,33 @@ from utils.translations import t
 
 
 def _render_profile_overview(profile: FarmProfile) -> None:
-    """Render a clean summary card of the active farm profile."""
+    """Render a clean enterprise summary card of the active farm profile."""
+    farmer_str = profile.farmer_name or "Not set"
+    farm_str = profile.farm_name or "My Farm"
+    loc_str = profile.location or "Location not set"
+    area_str = (
+        f"{profile.farm_area:.1f} {profile.area_unit}"
+        if profile.farm_area is not None
+        else "Not specified"
+    )
+    variety_info = f" ({profile.crop_variety})" if profile.crop_variety else ""
+
     st.markdown(
         f"""
-        <div class="metric-card metric-card-good" style="margin-bottom: 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+        <div class="metric-card metric-card-good" style="margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
                 <div>
                     <div class="metric-card-title">{t("farm_overview_title")}</div>
-                    <div class="metric-card-value" style="font-size: 1.7rem; margin-bottom: 0.2rem;">
-                        {profile.farm_name or "My Farm"}
+                    <div class="metric-card-value" style="font-size: 1.5rem; margin-bottom: 0.2rem;">
+                        {farm_str}
                     </div>
-                    <div style="color: var(--color-text-muted); font-size: 0.95rem; margin-bottom: 0.8rem;">
-                        {f"Farmer: {profile.farmer_name} • " if profile.farmer_name else ""}{profile.location or "Location not set"}
+                    <div style="color: var(--color-text-secondary); font-size: 0.9rem;">
+                        Farmer: <strong>{farmer_str}</strong> • Location: <strong>{loc_str}</strong>
                     </div>
                 </div>
-                <span class="badge badge-good" style="font-size: 0.85rem; padding: 0.35rem 0.8rem;">
-                    Active Context
-                </span>
+                <span class="badge badge-good">● Active Farm Context</span>
             </div>
-            <p class="metric-card-description" style="margin-bottom: 1rem;">
+            <p class="metric-card-description" style="margin-top: 0.65rem;">
                 {t("farm_overview_subtitle")}
             </p>
         </div>
@@ -53,16 +62,15 @@ def _render_profile_overview(profile: FarmProfile) -> None:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        variety_info = f" ({profile.crop_variety})" if profile.crop_variety else ""
         st.markdown(
             f"""
             <div class="metric-card" style="margin-bottom: 1rem;">
-                <div class="metric-card-title">{t("crop_label")}</div>
-                <div style="font-size: 1.25rem; font-weight: 600; color: var(--color-primary); margin: 0.3rem 0;">
+                <div class="metric-card-title">Crop Information</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-primary-dark); margin: 0.25rem 0;">
                     🌾 {profile.crop}{variety_info}
                 </div>
-                <div style="font-size: 0.88rem; color: var(--color-text-muted);">
-                    Stage: <strong>{profile.growth_stage or "Not specified"}</strong>
+                <div style="font-size: 0.86rem; color: var(--color-text-secondary);">
+                    Growth Stage: <strong>{profile.growth_stage or "Not specified"}</strong>
                 </div>
             </div>
             """,
@@ -72,32 +80,27 @@ def _render_profile_overview(profile: FarmProfile) -> None:
         st.markdown(
             f"""
             <div class="metric-card" style="margin-bottom: 1rem;">
-                <div class="metric-card-title">{t("soil_type_label")} & {t("irrigation_method_label")}</div>
-                <div style="font-size: 1.25rem; font-weight: 600; color: var(--color-text); margin: 0.3rem 0;">
-                    🟫 {profile.soil_type or "General Soil"}
+                <div class="metric-card-title">Soil & Irrigation</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-text); margin: 0.25rem 0;">
+                    🪨 {profile.soil_type or "General Soil"}
                 </div>
-                <div style="font-size: 0.88rem; color: var(--color-text-muted);">
-                    💧 {profile.irrigation_method or "Standard Irrigation"}
+                <div style="font-size: 0.86rem; color: var(--color-text-secondary);">
+                    Method: <strong>{profile.irrigation_method or "Standard"}</strong>
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
     with col3:
-        area_str = (
-            f"{profile.farm_area:.1f} {profile.area_unit}"
-            if profile.farm_area is not None
-            else "Not specified"
-        )
         st.markdown(
             f"""
             <div class="metric-card" style="margin-bottom: 1rem;">
-                <div class="metric-card-title">{t("farm_area_label")} & {t("location_label")}</div>
-                <div style="font-size: 1.25rem; font-weight: 600; color: var(--color-text); margin: 0.3rem 0;">
+                <div class="metric-card-title">Farm Area & Bounds</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: var(--color-text); margin: 0.25rem 0;">
                     📐 {area_str}
                 </div>
-                <div style="font-size: 0.88rem; color: var(--color-text-muted);">
-                    📍 {profile.location or "Not specified"}
+                <div style="font-size: 0.86rem; color: var(--color-text-secondary);">
+                    Region: <strong>{loc_str}</strong>
                 </div>
             </div>
             """,
@@ -114,9 +117,20 @@ def _render_profile_form(profile: FarmProfile, is_first_time: bool) -> None:
     if is_first_time:
         st.info(f"💡 {t('home_empty_profile_prompt')}")
 
-    st.markdown(f'<h3 style="font-family: var(--font-display); margin-bottom: 1rem;">{t("farm_form_title")}</h3>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--color-text);">'
+        f'{t("farm_form_title")}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
     with st.form("farm_profile_form", clear_on_submit=False):
+        st.markdown(
+            '<div style="font-weight: 650; font-size: 0.92rem; color: var(--color-primary); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.04em;">'
+            'Farmer & Farm Information'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         c1, c2 = st.columns(2)
         with c1:
             farmer_name = st.text_input(
@@ -131,9 +145,14 @@ def _render_profile_form(profile: FarmProfile, is_first_time: bool) -> None:
                 placeholder=t("farm_name_placeholder"),
             )
 
+        st.markdown(
+            '<div style="font-weight: 650; font-size: 0.92rem; color: var(--color-primary); margin: 0.6rem 0 0.4rem 0; text-transform: uppercase; letter-spacing: 0.04em;">'
+            'Crop Information'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         c3, c4 = st.columns(2)
         with c3:
-            # Determine crop select index
             crop_options = list(COMMON_CROPS)
             custom_crop = ""
             if profile.crop and profile.crop in crop_options:
@@ -142,7 +161,7 @@ def _render_profile_form(profile: FarmProfile, is_first_time: bool) -> None:
                 crop_options.insert(0, profile.crop)
                 crop_idx = 0
             else:
-                crop_idx = 2  # Default to Tomato for easy demonstration
+                crop_idx = 2  # Default to Tomato
 
             selected_crop = st.selectbox(t("crop_label"), options=crop_options, index=crop_idx)
             if selected_crop == "Other":
@@ -179,6 +198,12 @@ def _render_profile_form(profile: FarmProfile, is_first_time: bool) -> None:
                 index=soil_idx,
             )
 
+        st.markdown(
+            '<div style="font-weight: 650; font-size: 0.92rem; color: var(--color-primary); margin: 0.6rem 0 0.4rem 0; text-transform: uppercase; letter-spacing: 0.04em;">'
+            'Farm Details & Location'
+            '</div>',
+            unsafe_allow_html=True,
+        )
         c7, c8 = st.columns(2)
         with c7:
             area_val = profile.farm_area if profile.farm_area is not None else 5.0
@@ -220,6 +245,7 @@ def _render_profile_form(profile: FarmProfile, is_first_time: bool) -> None:
                 placeholder=t("location_placeholder"),
             )
 
+        st.markdown('<div style="height: 0.5rem;"></div>', unsafe_allow_html=True)
         submitted = st.form_submit_button(t("save_profile_button"), use_container_width=True)
 
         if submitted:
@@ -259,7 +285,7 @@ def render() -> None:
 
     st.markdown(f'<h1 class="hero-title">{t("farm_title")}</h1>', unsafe_allow_html=True)
     st.markdown(f'<p class="hero-tagline">{t("farm_subtitle")}</p>', unsafe_allow_html=True)
-    st.markdown('<div class="section-spacer" style="height: 1.25rem;"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-spacer" style="height: 1rem;"></div>', unsafe_allow_html=True)
 
     if configured and not st.session_state.edit_farm_profile:
         _render_profile_overview(profile)

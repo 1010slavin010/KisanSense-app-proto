@@ -1,9 +1,9 @@
-"""Crop Health and Plant Vision analysis page for KisanSense.
+"""Crop Health and Plant Vision screening page for KisanSense.
 
 Provides an intuitive, farmer-friendly interface for visual leaf disease screening
 using the offline, deterministic vision intelligence engine (services/vision_service.py).
 Integrates farm profile context, live field environmental telemetry, safety gating,
-and seamless handoff to the KisanSense AI Assistant.
+and conservative agronomic screening disclaimers.
 """
 
 from __future__ import annotations
@@ -27,11 +27,11 @@ def render() -> None:
     # 1. Header Section
     # =========================================================================
     st.markdown(
-        f'<div class="vision-header-title">🌿 {t("vision_header")}</div>',
+        f'<h1 class="hero-title">🌿 {t("vision_header")}</h1>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'<div class="vision-header-subtitle">{t("vision_subtitle")}</div>',
+        f'<p class="hero-tagline">{t("vision_subtitle")}</p>',
         unsafe_allow_html=True,
     )
 
@@ -58,7 +58,7 @@ def render() -> None:
     st.markdown(crop_badge, unsafe_allow_html=True)
 
     # =========================================================================
-    # 3. Simple Photo Guidance
+    # 3. Photo Guidance Chips
     # =========================================================================
     st.markdown(
         f"""
@@ -94,65 +94,68 @@ def render() -> None:
             key="vision_camera",
         )
 
-    # Active file from either uploader or camera
     active_input = uploaded_file or camera_file
 
-    # Evaluate analysis upon upload or camera capture
     result: VisionAnalysisResult | None = None
     uploaded_bytes: bytes | None = None
 
     if active_input is not None:
         try:
             uploaded_bytes = active_input.getvalue()
-            # Analyze image with local vision engine and active farm profile
             result = analyze_plant_image(uploaded_bytes, farm_context=farm_ctx)
-            # Store in session state for Assistant sharing and session persistence
             st.session_state.latest_vision_result = result
         except Exception as exc:
             st.error(f"Unable to process the image: {exc}")
             result = None
     elif st.session_state.get("latest_vision_result") is not None:
-        # Retain last result during the browser session if no new file is uploaded
         result = st.session_state.latest_vision_result
 
-    # If no image provided and no previous session result, display helpful prompt
+    # If no image provided, prompt user (required by test_initial_vision_render_clean)
     if result is None:
         st.info("📷 Upload a clear photo of an affected or healthy crop leaf to begin screening.")
         return
 
     # =========================================================================
-    # 5. Image Display & Quality Gate / Results
+    # 5. Diagnostic Result Card
     # =========================================================================
-    col_img, col_result = st.columns([1, 1.4])
+    col_img, col_result = st.columns([1, 1.35])
 
     with col_img:
         st.markdown('<div class="vision-card">', unsafe_allow_html=True)
         if uploaded_bytes:
             try:
-                st.image(uploaded_bytes, caption="Uploaded Leaf Photo", use_container_width=True)
+                st.image(uploaded_bytes, caption="Analyzed Leaf Specimen", use_container_width=True)
             except Exception:
                 st.write("📷 [Image loaded]")
         else:
             st.write("📷 *Recent scan from this session*")
+        
+        # Image quality assessment line
+        quality_label = "Good" if result.image_quality == "good" else "Poor / Unclear"
+        quality_color = "var(--color-good)" if result.image_quality == "good" else "var(--color-alert)"
+        st.markdown(
+            f'<div style="margin-top: 0.6rem; font-size: 0.85rem; color: var(--color-text-secondary);">'
+            f'IMAGE QUALITY: <strong style="color: {quality_color};">{quality_label}</strong>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col_result:
-        # ---------------------------------------------------------------------
-        # Case A: Image Quality Gate Rejected
-        # ---------------------------------------------------------------------
+        # Case A: Quality Gate Rejected
         if not result.success or result.image_quality != "good":
             st.markdown(
                 f"""
                 <div class="vision-card vision-result-rejected">
-                    <div style="font-size: 1.25rem; font-weight: 600; color: var(--color-alert); margin-bottom: 0.5rem;">
+                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--color-alert); margin-bottom: 0.4rem;">
                         📷 {t("vision_quality_reject_title")}
                     </div>
-                    <p style="color: var(--color-text); margin-bottom: 0.75rem; font-size: 0.95rem;">
+                    <p style="color: var(--color-text); margin-bottom: 0.65rem; font-size: 0.92rem;">
                         {result.explanation}
                     </p>
                     <div class="vision-section-box">
-                        <strong style="color: var(--color-primary); font-size: 0.88rem;">💡 {t("vision_what_to_do")}:</strong>
-                        <p style="margin: 0.3rem 0 0 0; color: var(--color-text); font-size: 0.92rem;">
+                        <strong style="color: var(--color-primary); font-size: 0.85rem;">💡 {t("vision_what_to_do")}:</strong>
+                        <p style="margin: 0.25rem 0 0 0; color: var(--color-text); font-size: 0.9rem;">
                             {result.recommended_action}
                         </p>
                     </div>
@@ -162,72 +165,67 @@ def render() -> None:
             )
             return
 
-        # ---------------------------------------------------------------------
-        # Case B: Diagnostic Result (Healthy or Symptom Detected)
-        # ---------------------------------------------------------------------
-        # Confidence Badge
+        # Case B: Diagnostic Result
         conf_pct = int(round(result.confidence * 100))
         if result.confidence_level == "high":
-            conf_badge = f'<span class="vision-badge-high">🟢 {t("vision_conf_high")} ({conf_pct}%)</span>'
+            conf_badge = f'<span class="vision-badge-high">● High Confidence ({conf_pct}%)</span>'
         elif result.confidence_level == "moderate":
-            conf_badge = f'<span class="vision-badge-moderate">🟡 {t("vision_conf_moderate")} ({conf_pct}%)</span>'
+            conf_badge = f'<span class="vision-badge-moderate">● Moderate Confidence ({conf_pct}%)</span>'
         else:
-            conf_badge = f'<span class="vision-badge-low">🟠 {t("vision_conf_low")} ({conf_pct}%)</span>'
+            conf_badge = f'<span class="vision-badge-low">● Low Confidence ({conf_pct}%)</span>'
 
         if result.healthy:
-            # Healthy Foliage
             card_class = "vision-result-healthy"
-            headline_icon = "🟢"
             headline_text = t("vision_healthy_title")
             headline_color = "var(--color-good)"
         else:
-            # Disease / Stress Detected
             card_class = "vision-result-warning"
-            headline_icon = "⚠️"
             headline_text = t("vision_warning_title")
             headline_color = "var(--color-warning)"
 
         category_label = result.category.replace("_", " ").title()
 
-        # Symptoms and Urgency badges
         symptoms_list = getattr(result, "symptoms_detected", [])
-        if symptoms_list:
-            symptoms_str = ", ".join(s.replace("_", " ").title() for s in symptoms_list)
-        else:
-            symptoms_str = t("vision_no_symptoms")
+        symptoms_str = ", ".join(s.replace("_", " ").title() for s in symptoms_list) if symptoms_list else t("vision_no_symptoms")
 
         urgency_key = f"vision_urgency_{getattr(result, 'treatment_urgency', 'none')}"
         urgency_label = t(urgency_key)
 
         affected_ratio = getattr(result, "affected_foliage_ratio", 0.0)
-        affected_str = f" • 🍃 {t('vision_affected_area')}: ~{affected_ratio*100:.1f}%" if affected_ratio > 0.0 else ""
+        affected_str = f" • 🍃 Affected foliage: ~{affected_ratio*100:.1f}%" if affected_ratio > 0.0 else ""
 
         st.markdown(
             f"""
             <div class="vision-card {card_class}">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
-                    <span style="font-size: 1.15rem; font-weight: 600; color: {headline_color};">
-                        {headline_icon} {headline_text}
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
+                    <span style="font-size: 0.85rem; font-weight: 700; color: {headline_color}; text-transform: uppercase; letter-spacing: 0.04em;">
+                        ● CROP HEALTH — {headline_text}
                     </span>
                     {conf_badge}
                 </div>
-                <div style="font-size: 1.45rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.4rem;">
+                <div style="font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.35rem;">
                     {result.diagnosis}
                 </div>
-                <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 0.85rem;">
-                    🌾 <strong>{result.crop}</strong> • 🏷️ {t("vision_category")}: {category_label} • ⚡ {t("vision_urgency_title")}: <strong>{urgency_label}</strong>{affected_str}
+                <div style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0.75rem;">
+                    🌾 <strong>{result.crop}</strong> • Category: <strong>{category_label}</strong> • Urgency: <strong>{urgency_label}</strong>{affected_str}
                 </div>
                 <div class="vision-section-box">
-                    <strong style="color: var(--color-text); font-size: 0.88rem;">🔬 {t("vision_symptoms_detected")}:</strong>
-                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text-muted); font-size: 0.88rem;">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">
+                        🔬 Symptoms Detected
+                    </div>
+                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text-secondary); font-size: 0.88rem;">
                         {symptoms_str}
                     </p>
-                    <strong style="color: var(--color-text); font-size: 0.88rem;">🔍 {t("vision_what_found")}:</strong>
-                    <p style="margin: 0.25rem 0 0.6rem 0; color: var(--color-text); font-size: 0.92rem; line-height: 1.45;">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">
+                        🔍 Screening Assessment
+                    </div>
+                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
                         {result.explanation}
                     </p>
-                    <strong style="color: var(--color-primary); font-size: 0.88rem;">🌱 {t("vision_what_to_do")}:</strong>
-                    <p style="margin: 0.25rem 0 0 0; color: var(--color-text); font-size: 0.92rem; line-height: 1.45;">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.03em;">
+                        🌱 Recommended Cultural Action
+                    </div>
+                    <p style="margin: 0.2rem 0 0 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
                         {result.recommended_action}
                     </p>
                 </div>
@@ -236,7 +234,6 @@ def render() -> None:
             unsafe_allow_html=True,
         )
 
-        # Hand-off to Assistant Button
         st.button(
             f"💬 {t('vision_ask_assistant_btn')}",
             key="btn_ask_vision_assistant",
@@ -245,67 +242,13 @@ def render() -> None:
         )
 
     # =========================================================================
-    # 6. Current Farm Conditions & Contextual Insight
+    # 6. Safety & Conservative Agronomic Disclaimer
     # =========================================================================
-    try:
-        from services.sensor_service import get_current_sensor_data
-        from services.farm_intelligence import evaluate_farm_intelligence
-
-        sensor_reading = st.session_state.get("sensor_reading")
-        if sensor_reading is None:
-            sensor_reading = get_current_sensor_data(farm_context=farm_ctx)
-
-        if sensor_reading is not None and sensor_reading.is_online:
-            st.markdown(f'<div class="insights-header">🌡️ {t("vision_farm_conditions_title")}</div>', unsafe_allow_html=True)
-            col_s1, col_s2, col_s3 = st.columns(3)
-            with col_s1:
-                st.markdown(
-                    f"""
-                    <div class="insight-card">
-                        <div class="insight-title">🌱 {t("card_soil_title")}</div>
-                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--color-text);">{sensor_reading.soil_moisture:.0f}%</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            with col_s2:
-                st.markdown(
-                    f"""
-                    <div class="insight-card">
-                        <div class="insight-title">🌡️ {t("card_temp_title")}</div>
-                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--color-text);">{sensor_reading.temperature:.0f}°C</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            with col_s3:
-                st.markdown(
-                    f"""
-                    <div class="insight-card">
-                        <div class="insight-title">💧 {t("card_humidity_title")}</div>
-                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--color-text);">{sensor_reading.humidity:.0f}%</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-            # Contextual note if high humidity might favor fungal development
-            if sensor_reading.humidity > 70.0 and not result.healthy and result.category == "fungal":
-                st.caption("💧 *Note: Field humidity is elevated (>70%), which creates favorable conditions for foliar fungal spread. Ensure canopy ventilation and reduce sprinkler watering.*")
-    except Exception:
-        pass
-
-    # =========================================================================
-    # 7. Safety & Agronomic Disclaimers
-    # =========================================================================
-    if result.warnings:
-        warning_lines = "<br/>".join(f"• {w}" for w in result.warnings)
-        st.markdown(
-            f"""
-            <div class="vision-disclaimer">
-                <strong>⚠️ {t("vision_disclaimer_title")}:</strong><br/>
-                {warning_lines}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        """
+        <div class="vision-disclaimer">
+            <strong>⚠️ AI Screening Notice:</strong> This assessment is an automated computer vision screening tool intended for early field detection and agronomic advisory. It is not a definitive laboratory diagnostic. Confirm severe symptoms with local agricultural extension officers before taking major chemical interventions.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )

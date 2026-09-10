@@ -1,8 +1,11 @@
-"""Reusable status card rendering for the KisanSense dashboard.
+"""Reusable metric card component for KisanSense.
 
-Cards are rendered as single HTML blocks so the design system in
-assets/style.css has full control over layout. No business logic
-lives here — callers pass already-computed status labels/types.
+Follows the agricultural technology design system:
+- Small uppercase label
+- Prominent legible value
+- Semantic status badge (dot + text label)
+- Optional subtle progress track
+- Concise descriptive context
 """
 
 from __future__ import annotations
@@ -18,11 +21,9 @@ def render_metric_card(
     status_label: str | None = None,
     progress_fraction: float | None = None,
 ) -> None:
-    badge_html = (
-        f'<span class="badge badge-{status_type}">{status_label}</span>'
-        if status_label
-        else ""
-    )
+    badge_html = ""
+    if status_label:
+        badge_html = f'<div style="margin-bottom: 0.35rem;"><span class="badge badge-{status_type}">● {status_label}</span></div>'
 
     progress_html = ""
     if progress_fraction is not None:

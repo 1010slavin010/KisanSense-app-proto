@@ -2,7 +2,8 @@
 
 Uses session-state-driven routing rather than Streamlit's folder-based
 multipage system, so the navbar's appearance stays fully under the
-design system's control. Includes multilingual selector.
+design system's control. Includes multilingual selector, theme toggle,
+and contextual active alert counter.
 """
 
 from __future__ import annotations
@@ -28,25 +29,41 @@ def _toggle_theme() -> None:
     st.session_state.theme = "dark" if current == "light" else "light"
 
 
+def _get_active_alert_count() -> int:
+    """Check active alert count from latest sensor telemetry for navigation indicator."""
+    reading = st.session_state.get("sensor_reading")
+    if reading is None:
+        return 0
+    count = 0
+    if not reading.is_online:
+        count += 1
+    if reading.battery_voltage and reading.battery_voltage < 3.4:
+        count += 1
+    if reading.soil_moisture < 30.0:
+        count += 1
+    elif reading.soil_moisture > 75.0:
+        count += 1
+    return count
+
+
 def render_navbar(current_page: str) -> None:
-    cols = st.columns([1.35, 0.72, 0.68, 0.78, 0.78, 0.72, 0.78, 0.70, 0.75, 0.75, 1.15, 0.95])
+    # -------------------------------------------------------------------------
+    # Top Header Bar: Brand Identity on Left, Controls (Lang + Theme) on Right
+    # -------------------------------------------------------------------------
+    col_brand, col_lang, col_theme = st.columns([4.2, 1.4, 1.2])
 
-    with cols[0]:
-        st.markdown(f'<div class="navbar-brand">{APP_NAME}</div>', unsafe_allow_html=True)
+    with col_brand:
+        st.markdown(
+            f'<div class="navbar-brand">'
+            f'<span>🌱 {APP_NAME}</span>'
+            f'<span style="font-size: 0.8rem; font-weight: 500; color: var(--color-text-muted); margin-left: 8px;">'
+            f'Smart Farming'
+            f'</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
-    for col, (key, _default_label) in zip(cols[1:10], NAV_ITEMS):
-        with col:
-            label = t(f"nav_{key}")
-            st.button(
-                label,
-                key=f"nav_{key}",
-                disabled=(key == current_page),
-                on_click=_go_to,
-                args=(key,),
-                use_container_width=True,
-            )
-
-    with cols[10]:
+    with col_lang:
         lang_keys = list(SUPPORTED_LANGUAGES.keys())
         current_lang = st.session_state.get("lang", DEFAULT_LANG)
         curr_idx = lang_keys.index(current_lang) if current_lang in lang_keys else 0
@@ -60,7 +77,7 @@ def render_navbar(current_page: str) -> None:
             label_visibility="collapsed",
         )
 
-    with cols[11]:
+    with col_theme:
         current_theme = st.session_state.get("theme", "light")
         theme_icon = "🌙" if current_theme == "light" else "☀️"
         theme_target_label = t("theme_dark") if current_theme == "light" else t("theme_light")
@@ -72,5 +89,27 @@ def render_navbar(current_page: str) -> None:
             use_container_width=True,
         )
 
+    # -------------------------------------------------------------------------
+    # Primary Navigation Row: 9 Clean Functional Buttons
+    # -------------------------------------------------------------------------
+    alert_count = _get_active_alert_count()
+    nav_cols = st.columns(len(NAV_ITEMS))
+
+    for col, (key, _default_label) in zip(nav_cols, NAV_ITEMS):
+        with col:
+            base_label = t(f"nav_{key}")
+            if key == "alerts" and alert_count > 0:
+                label = f"{base_label} ({alert_count})"
+            else:
+                label = base_label
+
+            st.button(
+                label,
+                key=f"nav_{key}",
+                disabled=(key == current_page),
+                on_click=_go_to,
+                args=(key,),
+                use_container_width=True,
+            )
 
     st.markdown('<hr class="navbar-divider" />', unsafe_allow_html=True)

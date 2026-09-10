@@ -3,6 +3,7 @@
 Connects agrarian weather forecasts with farm profile context, live sensor
 telemetry, Smart Farm Intelligence, irrigation logic, and crop vision screening.
 Operates with a deterministic agrarian simulation engine (100% offline).
+Clearly marks simulated weather data.
 """
 
 from __future__ import annotations
@@ -56,11 +57,11 @@ def render() -> None:
     # 2. Header & Location Context
     # ---------------------------------------------------------
     st.markdown(
-        f'<div class="weather-header-title">🌤️ {t("weather_page_title")}</div>',
+        f'<h1 class="hero-title">🌤️ {t("weather_page_title")}</h1>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'<div class="weather-header-subtitle">{t("weather_page_subtitle")}</div>',
+        f'<p class="hero-tagline">{t("weather_page_subtitle")}</p>',
         unsafe_allow_html=True,
     )
 
@@ -69,8 +70,8 @@ def render() -> None:
         f"""
         <div class="weather-context-banner">
             <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px;">
-                <span>{badge_profile}</span>
-                <span class="weather-badge-demo">⚙️ {t("weather_demo_mode_badge")}</span>
+                <span style="font-weight: 600; color: var(--color-text);">{badge_profile}</span>
+                <span class="weather-badge-demo">⚙️ SIMULATED WEATHER ({sim_condition})</span>
             </div>
         </div>
         """,
@@ -80,13 +81,14 @@ def render() -> None:
     # ---------------------------------------------------------
     # 3. Current Weather Metric Cards (5 Cards)
     # ---------------------------------------------------------
+    st.markdown('<div class="insights-header">CURRENT WEATHER</div>', unsafe_allow_html=True)
     col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
         st.markdown(
             f"""
             <div class="weather-metric-card">
-                <div class="weather-metric-label">🌡️ {t("card_temp_title")}</div>
+                <div class="weather-metric-label">Temperature</div>
                 <div class="weather-metric-value">{weather.temperature_c:.1f}°C</div>
                 <div class="weather-metric-sub">{weather.condition}</div>
             </div>
@@ -100,7 +102,7 @@ def render() -> None:
         st.markdown(
             f"""
             <div class="weather-metric-card">
-                <div class="weather-metric-label">🌧️ {t("weather_rain_chance")}</div>
+                <div class="weather-metric-label">Rain Probability</div>
                 <div class="weather-metric-value">{rain_prob}%</div>
                 <div class="weather-metric-sub">{rain_mm:.1f} mm expected</div>
             </div>
@@ -112,7 +114,7 @@ def render() -> None:
         st.markdown(
             f"""
             <div class="weather-metric-card">
-                <div class="weather-metric-label">💧 {t("card_humidity_title")}</div>
+                <div class="weather-metric-label">Air Humidity</div>
                 <div class="weather-metric-value">{weather.humidity:.0f}%</div>
                 <div class="weather-metric-sub">Canopy microclimate</div>
             </div>
@@ -124,7 +126,7 @@ def render() -> None:
         st.markdown(
             f"""
             <div class="weather-metric-card">
-                <div class="weather-metric-label">💨 {t("weather_wind_speed")}</div>
+                <div class="weather-metric-label">Wind Speed</div>
                 <div class="weather-metric-value">{weather.wind_speed_kmh:.1f} <span style="font-size: 0.85rem;">km/h</span></div>
                 <div class="weather-metric-sub">{weather.wind_direction} breeze</div>
             </div>
@@ -136,7 +138,7 @@ def render() -> None:
         st.markdown(
             f"""
             <div class="weather-metric-card">
-                <div class="weather-metric-label">☀️ {t("weather_evapotranspiration")}</div>
+                <div class="weather-metric-label">Evapotranspiration</div>
                 <div class="weather-metric-value">{weather.evapotranspiration_mm:.1f} <span style="font-size: 0.85rem;">mm/d</span></div>
                 <div class="weather-metric-sub">{weather.solar_irradiance_w_m2:.0f} W/m² solar</div>
             </div>
@@ -144,18 +146,18 @@ def render() -> None:
             unsafe_allow_html=True,
         )
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 4. Immediate Action Hero: "What Should I Do Now?"
+    # 4. Immediate Action Hero: "FARM WEATHER ADVISORY"
     # ---------------------------------------------------------
     status_color_class = f"weather-action-{insight.status_type}"
-    status_icon = "🚨" if insight.status_type == "alert" else ("⚠️" if insight.status_type == "warning" else "✅")
+    status_label = "CRITICAL ACTION" if insight.status_type == "alert" else ("ADVISORY" if insight.status_type == "warning" else "FAVORABLE")
 
     st.markdown(
         f"""
         <div class="weather-action-hero {status_color_class}">
-            <div class="weather-action-badge">{status_icon} {t("weather_action_title")}</div>
+            <div class="weather-action-badge">● FARM WEATHER ADVISORY — {status_label}</div>
             <div class="weather-action-headline">{insight.primary_action}</div>
             <div class="weather-action-detail">{insight.action_detail}</div>
         </div>
@@ -163,13 +165,13 @@ def render() -> None:
         unsafe_allow_html=True,
     )
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 5. "What Does This Mean for My Farm?" (Farm Impact Grid)
+    # 5. Farm Impact Grid
     # ---------------------------------------------------------
     st.markdown(
-        f'<div class="weather-section-title">🌾 {t("weather_farm_impact_title")}</div>',
+        f'<div class="weather-section-title">🌾 Farm Impact Analysis</div>',
         unsafe_allow_html=True,
     )
 
@@ -182,8 +184,8 @@ def render() -> None:
                 <div class="weather-impact-heading">🌱 {crop_name} Impact</div>
                 <div class="weather-impact-body">{insight.crop_impact_summary}</div>
             </div>
-            <div class="weather-impact-card" style="margin-top: 12px;">
-                <div class="weather-impact-heading">💧 {t("weather_irrigation_impact_title")}</div>
+            <div class="weather-impact-card" style="margin-top: 10px;">
+                <div class="weather-impact-heading">💧 Irrigation Guidance</div>
                 <div class="weather-impact-body">{insight.irrigation_guidance}</div>
             </div>
             """,
@@ -194,24 +196,24 @@ def render() -> None:
         st.markdown(
             f"""
             <div class="weather-impact-card">
-                <div class="weather-impact-heading">🛡️ {t("weather_crop_risk_title")}</div>
+                <div class="weather-impact-heading">🛡️ Crop Health & Pest Risk</div>
                 <div class="weather-impact-body">{insight.crop_health_risk_summary}</div>
             </div>
-            <div class="weather-impact-card" style="margin-top: 12px;">
-                <div class="weather-impact-heading">🚜 {t("weather_spraying_title")}</div>
+            <div class="weather-impact-card" style="margin-top: 10px;">
+                <div class="weather-impact-heading">🚜 Spraying & Field Operations</div>
                 <div class="weather-impact-body">{insight.field_work_advisory}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
     # 6. 3-Day Farm Forecast
     # ---------------------------------------------------------
     st.markdown(
-        f'<div class="weather-section-title">📅 {t("weather_forecast_title")}</div>',
+        f'<div class="weather-section-title">📅 3-Day Agronomic Forecast</div>',
         unsafe_allow_html=True,
     )
 
@@ -219,7 +221,7 @@ def render() -> None:
         f_cols = st.columns(len(weather.forecast))
         for idx, day in enumerate(weather.forecast):
             with f_cols[idx]:
-                rain_pill_color = "#3EA082" if day.rain_prob < 30 else ("#E5A43B" if day.rain_prob < 60 else "#3B82F6")
+                rain_pill_color = "#2E7D5B" if day.rain_prob < 30 else ("#C58A1A" if day.rain_prob < 60 else "#3B6EA8")
                 st.markdown(
                     f"""
                     <div class="forecast-card">
@@ -239,13 +241,13 @@ def render() -> None:
                     unsafe_allow_html=True,
                 )
 
-    st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
     # 7. Active Weather Risk Signals
     # ---------------------------------------------------------
     st.markdown(
-        f'<div class="weather-section-title">⚠️ {t("weather_risks_title")}</div>',
+        f'<div class="weather-section-title">⚠️ Weather Risk Signals</div>',
         unsafe_allow_html=True,
     )
 
@@ -260,7 +262,7 @@ def render() -> None:
                         <span class="weather-risk-badge">{risk.severity.upper()}</span>
                     </div>
                     <div class="weather-risk-desc">{risk.description}</div>
-                    <div class="weather-risk-mitigation"><strong>Action:</strong> {risk.mitigation}</div>
+                    <div class="weather-risk-mitigation"><strong>Recommended Action:</strong> {risk.mitigation}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -269,31 +271,17 @@ def render() -> None:
         st.markdown(
             f"""
             <div class="weather-no-risks-card">
-                ✅ {t("weather_no_risks")}
+                ● No active weather risk alerts. Weather conditions are favorable for {crop_name}.
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
     # 8. Ask Assistant CTA
     # ---------------------------------------------------------
-    st.markdown(
-        f"""
-        <div class="weather-assistant-box">
-            <div style="font-weight: 600; font-size: 1.05rem; margin-bottom: 6px;">
-                🤖 Have questions about today's forecast and your {crop_name}?
-            </div>
-            <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 12px;">
-                Ask the KisanSense Assistant for irrigation timing, disease prevention, and crop protection advice.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     assistant_prompt = f"How will today's weather ({weather.condition}, {weather.temperature_c:.0f}°C, {weather.rain_probability}% rain) affect my {crop_name} and irrigation?"
     st.button(
         f"💬 {t('weather_ask_assistant_btn')}",

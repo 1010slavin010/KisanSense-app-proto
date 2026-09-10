@@ -3,7 +3,7 @@
 Centralizes live notifications and safety advisories across:
 - Field telemetry and hardware connectivity (ESP32, battery, sensor probes)
 - Soil moisture and irrigation urgency
-- Weather & microclimate risk signals (heat, waterlogging, fungal-favorable conditions, wind)
+- Weather & microclimate risk signals (heat, waterlogging, fungal conditions, wind)
 - Plant vision screening advisories
 - Farm activity & advisory timeline
 """
@@ -29,9 +29,6 @@ def _go_to_assistant(prompt: str = "") -> None:
 
 
 def render() -> None:
-    # ---------------------------------------------------------
-    # 1. Fetch Farm State, Telemetry, and Weather
-    # ---------------------------------------------------------
     profile = get_farm_profile()
     farm_ctx = get_farm_context()
     has_profile = is_profile_configured(profile)
@@ -58,9 +55,6 @@ def render() -> None:
         weather_context=weather,
     )
 
-    # ---------------------------------------------------------
-    # 2. Centralized Alert Generation
-    # ---------------------------------------------------------
     alerts = generate_farm_alerts(
         reading=reading,
         farm_context=farm_ctx,
@@ -70,65 +64,79 @@ def render() -> None:
         irrigation_status=irrigation,
     )
 
-    # ---------------------------------------------------------
-    # 3. Header
-    # ---------------------------------------------------------
+    active_alerts = [a for a in alerts if a.is_active and a.severity != "GOOD"]
+    active_count = len(active_alerts)
+
+    # Header with active count
     st.markdown(
-        f'<div class="weather-header-title">🔔 {t("nav_alerts")}</div>',
+        f'<div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 0.2rem;">'
+        f'<h1 class="hero-title" style="margin-bottom: 0 !important;">ALERTS</h1>'
+        f'<span class="badge badge-info" style="font-size: 0.85rem;">[{active_count} active]</span>'
+        f'</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'<div class="weather-header-subtitle">Active alerts, safety advisories, and event timeline for your farm ({location} · {crop_name}).</div>',
+        f'<p class="hero-tagline">Safety alerts, telemetry diagnostics, and activity timeline for {crop_name} ({location}).</p>',
         unsafe_allow_html=True,
     )
 
-    # Tabs: Active Alerts vs Event Timeline
     tab_alerts, tab_timeline = st.tabs(["🔔 Active Alerts", "⏱️ Farm Activity Timeline"])
 
     with tab_alerts:
-        active_alerts = [a for a in alerts if a.is_active and a.severity != "GOOD"]
-
         if not active_alerts:
             st.markdown(
-                f"""
-                <div class="weather-no-risks-card" style="padding: 2rem; text-align: center;">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
-                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--color-good);">No Active Critical or Warning Alerts</div>
-                    <div style="font-size: 0.9rem; color: var(--color-text-muted); margin-top: 0.4rem;">
-                        All farm sensors, soil moisture, and atmospheric conditions are currently within normal balanced limits.
+                """
+                <div class="weather-no-risks-card" style="padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--color-good); margin-bottom: 0.35rem;">
+                        ● No Active Alerts
+                    </div>
+                    <div style="font-size: 0.88rem; color: var(--color-text-secondary);">
+                        All soil moisture, climate parameters, and telemetry connections are currently within monitored normal bounds.
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
         else:
-            st.markdown(
-                f'<div style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 1rem;">'
-                f'Found <strong>{len(active_alerts)}</strong> active safety alert(s) requiring attention:'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-            for alert_item in active_alerts:
-                sev = alert_item.severity.lower()
-                sev_class = f"risk-sev-{sev}"
-                icon = "🚨" if sev in ("critical", "alert") else ("⚠️" if sev == "warning" else "ℹ️")
+            # Group by severity order: CRITICAL, ALERT, WARNING, INFO
+            severity_groups = ["CRITICAL", "ALERT", "WARNING", "INFO"]
+            for group in severity_groups:
+                group_alerts = [a for a in active_alerts if a.severity.upper() == group]
+                if not group_alerts:
+                    continue
+
+                dot_color = "var(--color-alert)" if group in ("CRITICAL", "ALERT") else ("var(--color-warning)" if group == "WARNING" else "var(--color-info)")
                 st.markdown(
-                    f"""
-                    <div class="weather-risk-banner {sev_class}">
-                        <div class="weather-risk-header">
-                            <span class="weather-risk-title">{icon} [{alert_item.source.upper()}] {alert_item.title}</span>
-                            <span class="weather-risk-badge">{alert_item.severity}</span>
-                        </div>
-                        <div class="weather-risk-desc">{alert_item.message}</div>
-                        <div class="weather-risk-mitigation"><strong>Recommended Action:</strong> {alert_item.recommended_action}</div>
-                    </div>
-                    """,
+                    f'<div style="font-size: 0.85rem; font-weight: 700; color: {dot_color}; margin: 1rem 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em;">'
+                    f'● {group}'
+                    f'</div>',
                     unsafe_allow_html=True,
                 )
 
-        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+                for alert_item in group_alerts:
+                    st.markdown(
+                        f"""
+                        <div class="insight-card" style="margin-bottom: 0.65rem; border-left: 4px solid {dot_color};">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 6px; margin-bottom: 0.3rem;">
+                                <span style="font-size: 1rem; font-weight: 700; color: var(--color-text);">
+                                    {alert_item.title}
+                                </span>
+                                <span style="font-size: 0.78rem; color: var(--color-text-muted);">
+                                    🕒 {alert_item.timestamp}
+                                </span>
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--color-text); line-height: 1.45; margin-bottom: 0.5rem;">
+                                {alert_item.message}
+                            </div>
+                            <div class="action-secondary-box" style="font-size: 0.85rem;">
+                                <strong>Recommended:</strong> {alert_item.recommended_action}
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
-        # Ask Assistant CTA
+        st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
         st.button(
             "💬 Ask Assistant About Active Alerts",
             key="btn_alerts_ask_assistant",
@@ -148,11 +156,11 @@ def render() -> None:
                     <div class="home-weather-banner" style="margin-bottom: 0.45rem; padding: 0.65rem 0.95rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                             <div>
-                                <span style="font-size: 1.15rem; margin-right: 8px;">{evt.icon}</span>
+                                <span style="font-size: 1.1rem; margin-right: 6px;">{evt.icon}</span>
                                 <span style="font-weight: 700; font-size: 0.92rem; color: {sev_color};">{evt.title}</span>
-                                <span style="color: var(--color-text); font-size: 0.88rem; margin-left: 8px;">— {evt.description}</span>
+                                <span style="color: var(--color-text); font-size: 0.88rem; margin-left: 6px;">— {evt.description}</span>
                             </div>
-                            <div style="font-size: 0.82rem; color: var(--color-text-muted);">
+                            <div style="font-size: 0.8rem; color: var(--color-text-muted);">
                                 🕒 {evt.timestamp}
                             </div>
                         </div>

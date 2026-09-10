@@ -1,18 +1,21 @@
-"""Home page: SIH-grade Smart Farming Dashboard for KisanSense.
+"""Home page: Professional Smart Farming Dashboard for KisanSense.
 
 Answers the farmer's two most critical questions in seconds:
 1. "How is my farm?" (Authoritative Farm Health status & explanation)
 2. "What should I do now?" (Actionable recommendation card)
 
 Followed by:
-- 3-column Current Farm Conditions (Soil Moisture, Temperature, Air Humidity)
-- Quick Farm Insights (Soil, Climate, Water, Alerts)
-- "Ask KisanSense" Chatbot with interactive quick-question chips
+- 4-column Live Farm Conditions (Soil Moisture, Temperature, Air Humidity, Irrigation Status)
+- Crop Health screening preview
+- Weather summary
+- Quick Actions (Analyze Crop, Check Irrigation, View Alerts, Ask Assistant)
+- "KisanSense Assistant" Chatbot with quick question chips
 - Collapsible Telemetry & Hardware Controls (Simulation & ESP32)
 """
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 import streamlit as st
 
@@ -92,66 +95,63 @@ def render() -> None:
     has_profile = is_profile_configured(profile)
     reading = _get_sensor_reading(farm_ctx)
 
-    # =========================================================================
-    # A. HEADER: Title, Subtitle, Connectivity & Farm Context
-    # =========================================================================
-    st.markdown(f'<h1 class="hero-title">🌱 {APP_NAME}</h1>', unsafe_allow_html=True)
-    st.markdown(f'<p class="hero-tagline">{t("home_tagline")}</p>', unsafe_allow_html=True)
+    # -------------------------------------------------------------------------
+    # 1. HEADER: Personalized Greeting, Farm Identification & Connectivity
+    # -------------------------------------------------------------------------
+    farmer_display = profile.farmer_name if (has_profile and profile.farmer_name) else "Farmer"
+    farm_name_display = profile.farm_name if (has_profile and profile.farm_name) else "My Farm"
+    location_display = profile.location if (has_profile and profile.location) else "Mandya, Karnataka"
 
-    header_cols = st.columns([2, 3])
-    with header_cols[0]:
-        render_status_dot(t("home_status_active"))
-    with header_cols[1]:
+    col_h1, col_h2 = st.columns([3.2, 1.8])
+
+    with col_h1:
+        st.markdown(
+            f'<div style="margin-bottom: 0.15rem;">'
+            f'<span style="font-size: 0.95rem; font-weight: 500; color: var(--color-text-secondary);">'
+            f'Welcome back, <strong>{farmer_display}</strong>'
+            f'</span>'
+            f'<h1 class="hero-title" style="margin-top: 0.1rem; font-size: 1.85rem;">{farm_name_display}</h1>'
+            f'<div style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 0.15rem;">'
+            f'📍 {location_display}'
+            f'{" • 🌾 " + profile.crop if has_profile and profile.crop else ""}'
+            f'{" (" + profile.crop_variety + ")" if has_profile and profile.crop_variety else ""}'
+            f'{" • 🌱 " + profile.growth_stage if has_profile and profile.growth_stage else ""}'
+            f'</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    with col_h2:
         source_tag = (
             t("sensor_source_hardware")
             if reading.source == MODE_HARDWARE
             else t("sensor_source_simulation")
         )
         if reading.is_online:
-            dot_color = "var(--color-good)"
-            status_text = f"{t('sensor_online_label')} ({source_tag}) • {t('sensor_last_updated')} {reading.last_updated}"
+            dot_type = "good"
+            status_text = f"{t('sensor_online_label')} ({source_tag})"
+            timestamp_text = f"Updated {reading.last_updated or 'just now'}"
         else:
-            dot_color = "var(--color-alert)"
+            dot_type = "alert"
             status_text = f"{t('sensor_offline_label')} ({source_tag})"
+            timestamp_text = "Connection lost"
 
         st.markdown(
-            f'<div class="status-dot-row" style="justify-content: flex-end;">'
-            f'<span class="status-dot" style="background-color: {dot_color};"></span>'
-            f'<span class="status-dot-label" style="font-size: 0.88rem;">{status_text}</span>'
+            f'<div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; height: 100%;">'
+            f'<div class="status-dot-row">'
+            f'<span class="status-dot status-dot-{dot_type}"></span>'
+            f'<span style="font-weight: 600; font-size: 0.88rem;">{status_text}</span>'
+            f'</div>'
+            f'<div style="font-size: 0.78rem; color: var(--color-text-muted); margin-top: 0.2rem;">'
+            f'🕒 {timestamp_text}'
+            f'</div>'
             f'</div>',
             unsafe_allow_html=True,
         )
 
-    # Hardware diagnostics bar (if in hardware mode)
-    if reading.source == MODE_HARDWARE and reading.is_online:
-        batt_str = f"🔋 {reading.battery_voltage:.2f}V" if reading.battery_voltage is not None else ""
-        rssi_str = f"📶 {reading.wifi_rssi} dBm" if reading.wifi_rssi is not None else ""
-        dev_str = f"Node: {reading.device_id}" if reading.device_id else ""
-        diag_parts = [p for p in (dev_str, batt_str, rssi_str) if p]
-        if diag_parts:
-            st.markdown(
-                f'<div style="text-align: right; margin-top: -0.4rem; margin-bottom: 0.5rem; color: var(--color-text-muted); font-size: 0.82rem;">'
-                f"{' • '.join(diag_parts)}"
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-
-    # Active Farm Context Bar or Empty Prompt
-    if has_profile:
-        variety_text = f" ({profile.crop_variety})" if profile.crop_variety else ""
-        location_part = f" • 📍 {profile.location}" if profile.location else ""
-        stage_part = f" • 🌱 {profile.growth_stage}" if profile.growth_stage else ""
-        method_part = f" • 💧 {profile.irrigation_method}" if profile.irrigation_method else ""
-
-        st.markdown(
-            f'<div style="margin-top: 0.4rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">'
-            f'<span class="badge badge-good" style="font-size: 0.88rem; padding: 0.3rem 0.75rem;">🌾 {profile.crop}{variety_text}</span>'
-            f'<span style="color: var(--color-text-muted); font-size: 0.9rem;">{location_part}{stage_part}{method_part}</span>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown('<div style="height: 0.3rem;"></div>', unsafe_allow_html=True)
+    # Empty Profile Setup Prompt (preserves existing test expectation)
+    if not has_profile:
+        st.markdown('<div style="height: 0.4rem;"></div>', unsafe_allow_html=True)
         col_p1, col_p2 = st.columns([3.5, 1.2])
         with col_p1:
             st.info(f"💡 {t('home_empty_profile_prompt')}")
@@ -160,9 +160,9 @@ def render() -> None:
                 st.session_state.page = "farm"
                 st.rerun()
 
-    # Compute Statuses & Farm Intelligence
+    # Fetch Weather Snapshot & Evaluate Intelligence
     weather_snap = get_weather_snapshot(
-        location=profile.location if (profile and profile.location) else "Mandya, Karnataka",
+        location=location_display,
         condition_hint=st.session_state.get("sim_condition", "NORMAL"),
     )
     st.session_state.latest_weather_snapshot = weather_snap
@@ -196,9 +196,9 @@ def render() -> None:
             f"(Soil moisture is at {format_percent(reading.soil_moisture)})."
         )
 
-    # =========================================================================
-    # B. FARM HEALTH / OVERALL STATUS: "How is my farm?"
-    # =========================================================================
+    # -------------------------------------------------------------------------
+    # 2. PRIMARY FARM STATUS & ACTION RECOMMENDATION ("How is my farm?")
+    # -------------------------------------------------------------------------
     status_keys = {
         "Optimal Conditions": "intel_status_optimal",
         "Attention Needed": "intel_status_attention",
@@ -210,48 +210,119 @@ def render() -> None:
         "Stale Telemetry": "intel_status_attention",
     }
     status_label_text = t(status_keys.get(intel.primary_status, "intel_status_attention"))
-
     severity = intel.primary_severity
     if severity not in ("good", "warning", "alert", "critical"):
         severity = "alert" if not reading.is_online else "warning"
 
-    severity_dot = {
-        "good": "🟢",
-        "warning": "🟡",
-        "alert": "🟠",
-        "critical": "🔴",
-    }.get(severity, "🟡")
+    severity_badge_class = f"badge-{severity}" if severity in ("good", "warning", "alert") else "badge-alert"
 
-    health_badge_class = f"badge-{severity}" if severity in ("good", "warning", "alert") else "badge-alert"
+    # Action Recommendation logic grounded in existing irrigation & farm intelligence
+    if not reading.is_online:
+        action_headline = "Inspect field sensor connection"
+        action_detail = (
+            "Sensor telemetry is currently offline. Verify power and cable contact "
+            "before initiating irrigation."
+        )
+        action_badge_text = "SENSOR OFFLINE"
+        action_badge_class = "badge-alert"
+        secondary_html = ""
+    elif irrigation.needs_water:
+        crop_target = f" for your {profile.crop}" if has_profile and profile.crop else ""
+        action_headline = f"Water your crop soon{crop_target}"
+        action_detail = (
+            f"Soil moisture is at {reading.soil_moisture:.0f}%, which is below the recommended threshold. "
+            f"Irrigation is advised to prevent crop stress."
+        )
+        action_badge_text = "WATER RECOMMENDED"
+        action_badge_class = "badge-alert"
+        secondary_html = ""
+    else:
+        action_headline = "No irrigation needed right now"
+        action_detail = (
+            f"Soil moisture is at {reading.soil_moisture:.0f}%, which is currently sufficient. "
+            "Conditions are within the monitored range; continue regular observation."
+        )
+        action_badge_text = "MOISTURE BALANCED"
+        action_badge_class = "badge-good"
 
-    st.markdown(
-        f'<div class="farm-health-hero farm-health-hero-{severity}">'
-        f'<div class="farm-health-header-row">'
-        f'<div class="farm-health-title">🌾 {t("home_farm_health_title")}</div>'
-        f'<span class="badge {health_badge_class} farm-health-badge">{severity_dot} {status_label_text.upper()}</span>'
-        f'</div>'
-        f'<div class="farm-health-summary">{intel.overall_summary}</div>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
+        secondary_note = ""
+        if reading.humidity > 75.0:
+            secondary_note = (
+                f"👀 <strong>Foliage Monitoring</strong>: Air humidity is elevated ({reading.humidity:.0f}%). "
+                "Keep monitoring canopy for signs of foliar dampness or fungal stress."
+            )
+        elif reading.temperature > 35.0:
+            secondary_note = (
+                f"🌡️ <strong>Heat Management</strong>: High ambient temperature ({reading.temperature:.0f}°C). "
+                "Avoid midday spraying and ensure soil mulch retention."
+            )
+        elif intel.conditions and intel.conditions[0].recommended_action:
+            top_c = intel.conditions[0]
+            if top_c.severity != "good":
+                secondary_note = f"💡 <strong>{top_c.title}</strong>: {top_c.recommended_action}"
 
-    # =========================================================================
-    # C. CURRENT FARM CONDITIONS: 3-Column Telemetry Display
-    # =========================================================================
-    col1, col2, col3 = st.columns(3)
+        secondary_html = (
+            f'<div class="action-secondary-box" style="margin-top: 0.6rem;">{secondary_note}</div>'
+            if secondary_note
+            else ""
+        )
 
-    # 1. Soil Moisture Card
-    with col1:
+    # Render Two-Card Primary Status Row
+    col_status, col_action = st.columns([1, 1])
+
+    with col_status:
+        st.markdown(
+            f"""
+            <div class="farm-health-hero farm-health-hero-{severity}" style="height: 100%;">
+                <div class="farm-health-header-row">
+                    <span class="farm-health-title">FARM STATUS</span>
+                    <span class="badge {severity_badge_class}">● {status_label_text}</span>
+                </div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.35rem;">
+                    {status_label_text}
+                </div>
+                <div class="farm-health-summary" style="font-size: 0.92rem;">
+                    {intel.overall_summary}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col_action:
+        st.markdown(
+            f"""
+            <div class="action-hero-card" style="height: 100%; margin-bottom: 0;">
+                <div class="action-hero-header">
+                    <span class="action-hero-title">NEXT ACTION</span>
+                    <span class="badge {action_badge_class}">● {action_badge_text}</span>
+                </div>
+                <div class="action-headline" style="font-size: 1.2rem;">
+                    {action_headline}
+                </div>
+                <div class="action-explanation" style="font-size: 0.9rem; margin-bottom: 0;">
+                    {action_detail}
+                </div>
+                {secondary_html}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
+
+    # -------------------------------------------------------------------------
+    # 3. LIVE FARM CONDITIONS: 4 Clean Metric Cards
+    # -------------------------------------------------------------------------
+    st.markdown(f'<div class="insights-header">📊 Live Farm Conditions</div>', unsafe_allow_html=True)
+    m1, m2, m3, m4 = st.columns(4)
+
+    # Card 1: Soil Moisture
+    with m1:
         if reading.is_online:
-            if reading.soil_moisture < 30.0:
-                soil_desc = "Below 30% healthy threshold."
-            elif reading.soil_moisture <= 60.0:
-                soil_desc = "Adequate moisture for healthy roots."
-            else:
-                soil_desc = "Soil is sufficiently wet."
-
+            soil_desc = "Optimal root-zone moisture" if 30.0 <= reading.soil_moisture <= 60.0 else ("Dry soil — water soon" if reading.soil_moisture < 30.0 else "Wet soil — avoid water")
             render_metric_card(
-                title=f"🌱 {t('card_soil_title')}",
+                title=t("card_soil_title"),
                 value=format_percent(reading.soil_moisture),
                 status_type=soil_type,
                 status_label=t(f"status_{soil_label.lower()}"),
@@ -260,53 +331,41 @@ def render() -> None:
             )
         else:
             render_metric_card(
-                title=f"🌱 {t('card_soil_title')}",
+                title=t("card_soil_title"),
                 value="—",
                 status_type="alert",
                 status_label=t("sensor_offline_label"),
-                description="Probe offline. Check connection.",
+                description="Probe offline. Check wiring.",
             )
 
-    # 2. Temperature Card
-    with col2:
+    # Card 2: Temperature
+    with m2:
         if reading.is_online:
-            if 15.0 <= reading.temperature <= 35.0:
-                temp_desc = "Comfortable range (15°C–35°C)."
-            elif reading.temperature > 35.0:
-                temp_desc = "High heat — watch transpiration."
-            else:
-                temp_desc = "Cool temperature for growth."
-
+            t_desc = "Favorable growth range" if 15.0 <= reading.temperature <= 35.0 else ("Heatwave conditions" if reading.temperature > 35.0 else "Cool conditions")
             render_metric_card(
-                title=f"🌡️ {t('card_temp_title')}",
+                title=t("card_temp_title"),
                 value=format_temperature(reading.temperature),
                 status_type=temp_type,
                 status_label=t(f"status_{temp_label.lower()}"),
-                description=temp_desc,
+                description=t_desc,
             )
         else:
             render_metric_card(
-                title=f"🌡️ {t('card_temp_title')}",
+                title=t("card_temp_title"),
                 value="—",
                 status_type="alert",
                 status_label=t("sensor_offline_label"),
                 description="Sensor offline.",
             )
 
-    # 3. Air Humidity Card
-    with col3:
+    # Card 3: Air Humidity
+    with m3:
         if reading.is_online:
             hum_status = "good" if 40.0 <= reading.humidity <= 75.0 else "warning"
             hum_label = "normal" if 40.0 <= reading.humidity <= 75.0 else ("high" if reading.humidity > 75.0 else "low")
-            if 40.0 <= reading.humidity <= 75.0:
-                hum_desc = "Balanced canopy atmospheric moisture."
-            elif reading.humidity > 75.0:
-                hum_desc = "High humidity — monitor foliage."
-            else:
-                hum_desc = "Dry air — rapid transpiration."
-
+            hum_desc = "Balanced canopy air" if 40.0 <= reading.humidity <= 75.0 else ("High humidity — check foliage" if reading.humidity > 75.0 else "Dry atmospheric air")
             render_metric_card(
-                title=f"💧 {t('card_humidity_title')}",
+                title=t("card_humidity_title"),
                 value=format_percent(reading.humidity),
                 status_type=hum_status,
                 status_label=t(f"status_{hum_label}"),
@@ -315,283 +374,184 @@ def render() -> None:
             )
         else:
             render_metric_card(
-                title=f"💧 {t('card_humidity_title')}",
+                title=t("card_humidity_title"),
                 value="—",
                 status_type="alert",
                 status_label=t("sensor_offline_label"),
                 description="Sensor offline.",
             )
 
-    st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
+    # Card 4: Irrigation Status
+    with m4:
+        if not reading.is_online:
+            irrig_val = "Offline"
+            irrig_status = "alert"
+            irrig_label = "Probe Offline"
+            irrig_desc = "Fail-safe engaged."
+        elif irrigation.needs_water:
+            irrig_val = "Water Now"
+            irrig_status = "alert"
+            irrig_label = "Low Moisture"
+            irrig_desc = "Apply water via irrigation."
+        elif irrigation.label == "Wait / Rain Likely":
+            irrig_val = "Monitor"
+            irrig_status = "warning"
+            irrig_label = "Rain Expected"
+            irrig_desc = "Hold water; rain forecasted."
+        else:
+            irrig_val = "Sufficient"
+            irrig_status = "good"
+            irrig_label = "No Water Needed"
+            irrig_desc = "Moisture currently adequate."
 
-    # =========================================================================
-    # D. WHAT SHOULD I DO NOW? Prominent Action Recommendation Card
-    # =========================================================================
-    # Decision sourced 100% from existing Farm Intelligence & Irrigation status
-    if not reading.is_online:
-        action_headline = "⚠️ Inspect field sensor connection"
-        action_detail = (
-            "Sensor telemetry is currently offline. Verify field device power and probe contact "
-            "before turning on irrigation."
-        )
-        action_badge_text = "SENSOR OFFLINE"
-        action_badge_class = "badge-alert"
-        secondary_html = ""
-    elif irrigation.needs_water:
-        crop_target = f" for your {profile.crop}" if has_profile and profile.crop else ""
-        action_headline = f"💧 Water your crop{crop_target}"
-        action_detail = (
-            f"Soil moisture is at {reading.soil_moisture:.0f}%, which is below the recommended level. "
-            f"Irrigation is recommended to protect crop health."
-        )
-        action_badge_text = "IRRIGATION RECOMMENDED"
-        action_badge_class = "badge-alert"
-        secondary_html = ""
-    else:
-        action_headline = "💧 No watering needed right now"
-        action_detail = (
-            f"Soil moisture is at {reading.soil_moisture:.0f}%, which is currently sufficient. "
-            "Avoid adding water for now and monitor again later."
-        )
-        action_badge_text = "SOIL MOISTURE HEALTHY"
-        action_badge_class = "badge-good"
-
-        # Secondary advice from conditions if moisture is already fine
-        secondary_note = ""
-        if reading.humidity > 75.0:
-            secondary_note = (
-                f"👀 <strong>Foliage Monitoring</strong>: Air humidity is high ({reading.humidity:.0f}%). "
-                "Keep monitoring crop foliage for prolonged wetness or signs of fungal disease."
-            )
-        elif reading.temperature > 35.0:
-            secondary_note = (
-                f"🌡️ <strong>Heat Management</strong>: Field temperature is elevated ({reading.temperature:.0f}°C). "
-                "Protect sensitive plants and avoid midday spraying."
-            )
-        elif intel.conditions and intel.conditions[0].recommended_action:
-            top_c = intel.conditions[0]
-            if top_c.severity != "good":
-                secondary_note = f"💡 <strong>{top_c.title}</strong>: {top_c.recommended_action}"
-
-        secondary_html = (
-            f'<div class="action-secondary-box">{secondary_note}</div>'
-            if secondary_note
-            else ""
+        render_metric_card(
+            title="IRRIGATION",
+            value=irrig_val,
+            status_type=irrig_status,
+            status_label=irrig_label,
+            description=irrig_desc,
         )
 
-    st.markdown(
-        f'<div class="action-hero-card">'
-        f'<div class="action-hero-header">'
-        f'<div class="action-hero-title">💡 {t("home_action_title")}</div>'
-        f'<span class="badge {action_badge_class}">{action_badge_text}</span>'
-        f'</div>'
-        f'<div class="action-headline">{action_headline}</div>'
-        f'<div class="action-explanation">{action_detail}</div>'
-        f'{secondary_html}'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
 
-    # Weather Intelligence Context Banner
-    st.markdown(
-        f"""
-        <div class="home-weather-banner">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                <div>
-                    <span style="font-weight: 700; font-size: 0.95rem;">🌤️ {t('weather_home_banner_title')}:</span>
-                    <span style="font-size: 0.9rem; margin-left: 6px;">{weather_snap.condition} · {weather_snap.temperature_c:.0f}°C · 🌧️ {weather_snap.rain_probability}% {t('weather_rain_chance').lower()} ({weather_snap.precipitation_mm:.1f} mm)</span>
-                </div>
-                <div style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600;">
-                    📍 {weather_snap.location}
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # -------------------------------------------------------------------------
+    # 4. CROP HEALTH & WEATHER (Compact 2-Column Section)
+    # -------------------------------------------------------------------------
+    col_crop, col_weather = st.columns([1, 1])
 
-    # Plant Health Screening Banner (Phase 6 Vision Preview)
-    if latest_vision is None:
-        col_ph1, col_ph2 = st.columns([3.5, 1.2])
-        with col_ph1:
+    # Left: Crop Health
+    with col_crop:
+        st.markdown(f'<div class="insights-header">🌿 Crop Health Screening</div>', unsafe_allow_html=True)
+        if latest_vision is None:
             st.markdown(
                 f"""
-                <div class="home-weather-banner" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
-                    <span style="font-weight: 700; font-size: 0.95rem;">🌿 {t('home_plant_health_title')}:</span>
-                    <span style="font-size: 0.9rem; margin-left: 6px; color: var(--color-text-muted);">{t('home_plant_health_no_scan')}</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        with col_ph2:
-            if st.button(f"📷 {t('home_plant_health_scan_now')}", key="btn_home_scan_leaf", use_container_width=True):
-                st.session_state.page = "vision"
-                st.rerun()
-    else:
-        conf_pct = int(round(latest_vision.confidence * 100))
-        status_label = t("home_plant_health_status_healthy") if latest_vision.healthy else t("home_plant_health_status_issue")
-        badge_color = "var(--color-good)" if latest_vision.healthy else "var(--color-warning)"
-        urgency_txt = t(f"vision_urgency_{getattr(latest_vision, 'treatment_urgency', 'none')}")
-
-        col_ph1, col_ph2 = st.columns([3.5, 1.2])
-        with col_ph1:
-            st.markdown(
-                f"""
-                <div class="home-weather-banner" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                        <div>
-                            <span style="font-weight: 700; font-size: 0.95rem;">🌿 {t('home_plant_health_title')}:</span>
-                            <span style="font-size: 0.9rem; margin-left: 6px; font-weight: 600; color: {badge_color};">{status_label}</span>
-                            <span style="font-size: 0.85rem; margin-left: 8px; color: var(--color-text);">— {latest_vision.diagnosis} ({latest_vision.crop})</span>
+                <div class="insight-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.95rem; color: var(--color-text); margin-bottom: 0.25rem;">
+                            No crop image analyzed yet
                         </div>
-                        <div style="font-size: 0.82rem; color: var(--color-text-muted);">
-                            ⚡ {t('home_plant_health_urgency')}: <strong>{urgency_txt}</strong> • 🎯 {conf_pct}%
+                        <div style="font-size: 0.86rem; color: var(--color-text-secondary); margin-bottom: 0.75rem;">
+                            Upload a photo of an affected or healthy crop leaf to screen for disease or nutrient deficiency.
                         </div>
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-        with col_ph2:
-            if st.button(f"🔍 {t('home_plant_health_view_scan')}", key="btn_home_view_scan", use_container_width=True):
+            if st.button("📷 Analyze Crop", key="btn_home_scan_leaf", use_container_width=True):
+                st.session_state.page = "vision"
+                st.rerun()
+        else:
+            conf_pct = int(round(latest_vision.confidence * 100))
+            badge_class = "badge-good" if latest_vision.healthy else "badge-warning"
+            status_text = "Healthy Foliage" if latest_vision.healthy else "Possible Stress Detected"
+            diagnosis_text = latest_vision.diagnosis
+
+            st.markdown(
+                f"""
+                <div class="insight-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <span style="font-weight: 650; font-size: 0.95rem; color: var(--color-text);">{diagnosis_text}</span>
+                        <span class="badge {badge_class}">● {status_text}</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 0.65rem;">
+                        Confidence: <strong>{conf_pct}%</strong> • Crop: <strong>{latest_vision.crop}</strong>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button("🔍 View Scan Details", key="btn_home_view_scan", use_container_width=True):
                 st.session_state.page = "vision"
                 st.rerun()
 
-    # =========================================================================
-    # E. QUICK FARM INSIGHTS (Soil, Climate, Water, Alerts)
-    # =========================================================================
-    st.markdown(f'<div class="insights-header">📋 {t("home_insights_title")}</div>', unsafe_allow_html=True)
-    ins_col1, ins_col2, ins_col3, ins_col4 = st.columns(4)
+    # Right: Weather Summary
+    with col_weather:
+        st.markdown(f'<div class="insights-header">🌤️ Weather & Climate</div>', unsafe_allow_html=True)
+        if weather_snap is not None:
+            w_cond = weather_snap.condition
+            w_temp = f"{weather_snap.temperature_c:.0f}°C"
+            w_rain = f"{weather_snap.rain_probability}%"
+            w_wind = f"{weather_snap.wind_speed_kmh:.0f} km/h"
+            w_loc = weather_snap.location
 
-    with ins_col1:
-        if reading.is_online:
-            if reading.soil_moisture < 30.0:
-                s_txt = f"Low moisture ({reading.soil_moisture:.0f}%) — soil is dry."
-            elif reading.soil_moisture <= 60.0:
-                s_txt = f"Healthy moisture ({reading.soil_moisture:.0f}%) — good root uptake."
-            else:
-                s_txt = f"Sufficiently wet ({reading.soil_moisture:.0f}%) — avoid water."
+            st.markdown(
+                f"""
+                <div class="insight-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <span style="font-size: 1.15rem; font-weight: 700; color: var(--color-text);">{w_temp} · {w_cond}</span>
+                        <span class="badge badge-info">📍 {w_loc}</span>
+                    </div>
+                    <div style="font-size: 0.88rem; color: var(--color-text-secondary); margin-bottom: 0.65rem;">
+                        Rain Chance: <strong>{w_rain}</strong> • Wind: <strong>{w_wind}</strong> • Humidity: <strong>{weather_snap.humidity:.0f}%</strong>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button("🌤️ View Full Weather Forecast", key="btn_home_view_weather", use_container_width=True):
+                st.session_state.page = "weather"
+                st.rerun()
         else:
-            s_txt = "Sensor offline."
-        st.markdown(
-            f'<div class="insight-card">'
-            f'<div class="insight-title">🌱 {t("home_soil_insight")}</div>'
-            f'<div class="insight-body">{s_txt}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
-    with ins_col2:
-        if reading.is_online:
-            if 15.0 <= reading.temperature <= 35.0:
-                c_txt = f"Favorable temperature ({reading.temperature:.0f}°C) for growth."
-            elif reading.temperature > 35.0:
-                c_txt = f"Elevated heat ({reading.temperature:.0f}°C) — watch wilting."
-            else:
-                c_txt = f"Cool temperature ({reading.temperature:.0f}°C)."
-        else:
-            c_txt = "Climate sensor offline."
-        st.markdown(
-            f'<div class="insight-card">'
-            f'<div class="insight-title">🌡️ {t("home_climate_insight")}</div>'
-            f'<div class="insight-body">{c_txt}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
-    with ins_col3:
-        if reading.is_online:
-            if irrigation.needs_water:
-                w_txt = "Irrigation is advised for your field."
-            else:
-                w_txt = "Irrigation is not required now."
-        else:
-            w_txt = "Check soil manually."
-        st.markdown(
-            f'<div class="insight-card">'
-            f'<div class="insight-title">💧 {t("home_water_insight")}</div>'
-            f'<div class="insight-body">{w_txt}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-
-    with ins_col4:
-        if not reading.is_online:
-            a_txt = "⚠️ Sensor probe is offline."
-        elif reading.battery_voltage and reading.battery_voltage < 3.4:
-            a_txt = f"⚠️ Battery low ({reading.battery_voltage:.2f}V)."
-        elif irrigation.needs_water:
-            a_txt = "⚠️ Water needed for crop."
-        elif reading.humidity > 80.0:
-            a_txt = "⚠️ High canopy humidity."
-        else:
-            a_txt = f"✅ {t('home_no_alerts')}"
-        st.markdown(
-            f'<div class="insight-card">'
-            f'<div class="insight-title">🔔 {t("home_alerts_insight")}</div>'
-            f'<div class="insight-body">{a_txt}</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+            st.markdown(
+                """
+                <div class="insight-card">
+                    <div style="color: var(--color-text-muted); font-size: 0.9rem;">
+                        Weather data unavailable.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
     st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
 
-    # =========================================================================
-    # E2. QUICK ACTIONS (Scan Crop, Check Irrigation, View Alerts, Devices, Analytics)
-    # =========================================================================
-    st.markdown(f'<div class="insights-header">⚡ {t("qa_title")}</div>', unsafe_allow_html=True)
-    qa1, qa2, qa3, qa4, qa5, qa6 = st.columns(6)
+    # -------------------------------------------------------------------------
+    # 5. QUICK ACTIONS: 4 Clean Action Cards/Buttons
+    # -------------------------------------------------------------------------
+    st.markdown(f'<div class="insights-header">⚡ Quick Actions</div>', unsafe_allow_html=True)
+    qa1, qa2, qa3, qa4 = st.columns(4)
 
     with qa1:
-        if st.button(f"📷 {t('qa_scan')}", key="btn_qa_scan", use_container_width=True):
+        if st.button("📷 Analyze Crop", key="btn_qa_scan", use_container_width=True):
             st.session_state.page = "vision"
             st.rerun()
 
     with qa2:
-        if st.button(f"💧 {t('qa_irrigation')}", key="btn_qa_irrigation", use_container_width=True):
+        if st.button("💧 Check Irrigation", key="btn_qa_irrigation", use_container_width=True):
             st.session_state.page = "irrigation"
             st.rerun()
 
     with qa3:
-        if st.button(f"🔔 {t('qa_alerts')}", key="btn_qa_alerts", use_container_width=True):
+        if st.button("🔔 View Alerts", key="btn_qa_alerts", use_container_width=True):
             st.session_state.page = "alerts"
             st.rerun()
 
     with qa4:
-        if st.button(f"📡 {t('qa_devices')}", key="btn_qa_devices", use_container_width=True):
-            st.session_state.page = "devices"
-            st.rerun()
-
-    with qa5:
-        if st.button(f"📈 {t('qa_analytics')}", key="btn_qa_analytics", use_container_width=True):
-            st.session_state.page = "analytics"
-            st.rerun()
-
-    with qa6:
-        if st.button(f"💬 {t('qa_assistant')}", key="btn_qa_assistant", use_container_width=True):
+        if st.button("💬 Ask Assistant", key="btn_qa_assistant", use_container_width=True):
             st.session_state.page = "assistant"
             st.rerun()
 
     st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
 
-    # =========================================================================
-    # F. ASK KISANSENSE: Chatbot with Suggested Question Chips
-    # =========================================================================
+    # -------------------------------------------------------------------------
+    # 6. KISANSENSE ASSISTANT (Chatbot on Home Page)
+    # -------------------------------------------------------------------------
     st.markdown(
-        f'<div style="margin-bottom: 0.6rem;">'
-        f'<div class="assistant-title">🤖 {t("assistant_title")}</div>'
-        f'<p class="assistant-subtitle">{t("home_ask_subtitle")}</p>'
+        f'<div style="margin-bottom: 0.5rem;">'
+        f'<div class="assistant-title">🤖 KisanSense Assistant</div>'
+        f'<p class="assistant-subtitle">Ask about your farm, crop, irrigation or current conditions.</p>'
         f'</div>',
         unsafe_allow_html=True,
     )
 
-    # Suggested question chips
+    # 4 Clean Suggested Prompt Chips
     chip_cols = st.columns(4)
     chips = [
-        (chip_cols[0], f"🌾 {t('home_chip_farm')}", "How is my farm?"),
-        (chip_cols[1], f"💧 {t('home_chip_water')}", "Should I water my crop?"),
-        (chip_cols[2], f"💡 {t('home_chip_action')}", "What should I do now?"),
-        (chip_cols[3], f"🌱 {t('home_chip_soil')}", "How is the soil?"),
+        (chip_cols[0], "🌾 " + t("home_chip_water"), "Should I water my crop?"),
+        (chip_cols[1], "🌱 " + t("home_chip_soil"), "How is my soil?"),
+        (chip_cols[2], "💡 " + t("home_chip_today"), "What should I do today?"),
+        (chip_cols[3], "🌿 " + t("home_chip_stress"), "Is my crop under stress?"),
     ]
 
     for col, label, query in chips:
@@ -615,12 +575,12 @@ def render() -> None:
                 st.session_state.chat_messages.append({"role": "assistant", "content": reply})
                 st.rerun()
 
-    # Chatbot component (messages history + input)
+    # Chatbot Component
     render_chatbot(reading=reading, farm_context=farm_ctx)
 
-    # =========================================================================
-    # G. TELEMETRY & SIMULATION CONTROLS (Collapsible)
-    # =========================================================================
+    # -------------------------------------------------------------------------
+    # 7. TELEMETRY & SIMULATION CONTROLS (Collapsible)
+    # -------------------------------------------------------------------------
     st.markdown('<div class="section-spacer" style="height: 1.25rem;"></div>', unsafe_allow_html=True)
     with st.expander(f"⚙️ {t('sim_condition_label')}", expanded=False):
         c_mode, c_detail = st.columns([1.5, 3])
@@ -685,7 +645,6 @@ def render() -> None:
                         )
                         st.rerun()
             else:
-                # Hardware test injector and live listener
                 if not is_telemetry_server_running():
                     try:
                         start_telemetry_server()

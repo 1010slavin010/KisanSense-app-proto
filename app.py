@@ -99,6 +99,22 @@ def load_css(path: str) -> None:
           border-color: #2D3B34 !important;
           color: #F1F5F3 !important;
         }
+        [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]),
+        [data-testid="stChatMessage"][data-role="user"] {
+          background-color: #222C28 !important;
+          border-color: #2D3B34 !important;
+          color: #F1F5F3 !important;
+        }
+        [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]),
+        [data-testid="stChatMessage"][data-role="assistant"] {
+          background-color: #18221E !important;
+          border-color: #2D3B34 !important;
+          border-left: 3px solid #3EA082 !important;
+          color: #F1F5F3 !important;
+        }
+        [data-testid="stChatMessage"] p, [data-testid="stChatMessage"] div {
+          color: #F1F5F3 !important;
+        }
         [data-testid="stChatInput"] {
           background-color: #1B2320 !important;
           border-color: #2D3B34 !important;
@@ -118,8 +134,9 @@ def load_css(path: str) -> None:
           color: #3EA082 !important;
         }
         .stButton > button {
+          background-color: #1B2320 !important;
           border-color: #2D3B34 !important;
-          color: #9BB0A5 !important;
+          color: #F1F5F3 !important;
         }
         .stButton > button:hover {
           background-color: #1A382C !important;
@@ -127,8 +144,8 @@ def load_css(path: str) -> None:
           border-color: #3EA082 !important;
         }
         .stButton > button:disabled {
-          background-color: #3EA082 !important;
-          color: #111614 !important;
+          background-color: #1A382C !important;
+          color: #52B775 !important;
           border-color: #3EA082 !important;
           font-weight: 600 !important;
         }

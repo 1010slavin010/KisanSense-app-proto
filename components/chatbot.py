@@ -20,8 +20,13 @@ def render_chatbot(
     reading: Any | None = None,
     farm_context: dict[str, Any] | None = None,
 ) -> None:
-    st.markdown(f'<div class="assistant-title">{t("assistant_title")}</div>', unsafe_allow_html=True)
-    st.markdown(f'<p class="assistant-subtitle">{t("assistant_subtitle")}</p>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="margin-top: 0.5rem; margin-bottom: 0.75rem;">'
+        f'<div class="assistant-title">🤖 {t("assistant_title")}</div>'
+        f'<p class="assistant-subtitle">{t("assistant_subtitle")}</p>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
     if not st.session_state.chat_messages:
         with st.chat_message("assistant", avatar="🌾"):

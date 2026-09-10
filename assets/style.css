@@ -1,109 +1,224 @@
-/* KisanSense design system — Phase 1 */
+/* ==========================================================================
+   KisanSense Design System — Professional Agricultural Technology UI
+   ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --color-bg: #F5F3EC;
+  /* Core Color System */
+  --color-bg: #F7F7F2;
   --color-surface: #FFFFFF;
-  --color-surface-alt: #FBFAF5;
-  --color-border: #E3DFD1;
-  --color-text: #23271F;
-  --color-text-muted: #6E6C5E;
+  --color-surface-alt: #F3F6F4;
+  --color-surface-muted: #EBEFE8;
+  
+  --color-border: #DDE4E0;
+  --color-border-subtle: #E8EDE9;
+  --color-border-focus: #1F5C52;
 
+  --color-text: #17211F;
+  --color-text-secondary: #5E6B67;
+  --color-text-muted: #7A8884;
+
+  /* Brand Agricultural Greens */
   --color-primary: #1F5C52;
-  --color-primary-soft: #E4EEEA;
+  --color-primary-dark: #164A42;
+  --color-primary-soft: #EBF3F1;
+  --color-primary-border: #C8DBD6;
 
-  --color-good: #4C7A5A;
-  --color-good-soft: #E7EFE7;
-  --color-warning: #B9791F;
-  --color-warning-soft: #FBEEDD;
-  --color-alert: #B4532F;
-  --color-alert-soft: #F8E3D9;
+  /* Semantic Status Colors */
+  --color-good: #2E7D5B;
+  --color-good-soft: #EDF7F2;
+  --color-good-border: #CBE6D7;
 
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --color-warning: #C58A1A;
+  --color-warning-soft: #FDF6E9;
+  --color-warning-border: #F7E2B5;
 
-  --radius-lg: 20px;
-  --radius-md: 14px;
-  --shadow-card: 0 1px 2px rgba(35, 39, 31, 0.05), 0 10px 24px rgba(35, 39, 31, 0.06);
+  --color-alert: #C94C4C;
+  --color-alert-soft: #FDF0F0;
+  --color-alert-border: #F7CCCC;
+
+  --color-info: #3B6EA8;
+  --color-info-soft: #EEF4FA;
+  --color-info-border: #C9DCF0;
+
+  /* Typography Stack */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Spacing System */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* Restrained Shadows */
+  --shadow-subtle: 0 1px 2px rgba(23, 33, 31, 0.04);
+  --shadow-card: 0 1px 3px rgba(23, 33, 31, 0.04), 0 4px 12px rgba(23, 33, 31, 0.03);
+  --shadow-hover: 0 2px 6px rgba(23, 33, 31, 0.06), 0 8px 18px rgba(23, 33, 31, 0.04);
 }
 
+/* --------------------------------------------------------------------------
+   1. GLOBAL & RESET
+   -------------------------------------------------------------------------- */
+
 html, body, [class*="css"] {
-  font-family: var(--font-body);
+  font-family: var(--font-sans) !important;
   color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .stApp {
   background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 .block-container {
-  padding-top: 2.5rem;
-  padding-bottom: 4rem;
-  max-width: 1080px;
+  padding-top: 1.5rem !important;
+  padding-bottom: 3.5rem !important;
+  max-width: 1160px !important;
+  margin: 0 auto;
 }
 
-footer { visibility: hidden; }
+footer { visibility: hidden; height: 0; }
 #MainMenu { visibility: hidden; }
+header[data-testid="stHeader"] { background-color: transparent !important; }
 
-/* Navbar */
+/* --------------------------------------------------------------------------
+   2. TYPOGRAPHY
+   -------------------------------------------------------------------------- */
+
+h1, .hero-title {
+  font-family: var(--font-sans) !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  color: var(--color-text) !important;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem 0 !important;
+  line-height: 1.25 !important;
+}
+
+.hero-tagline {
+  font-size: 0.95rem !important;
+  color: var(--color-text-secondary) !important;
+  margin: 0 0 1rem 0 !important;
+  line-height: 1.5 !important;
+}
+
+.section-title, .insights-header, .weather-section-title {
+  font-family: var(--font-sans) !important;
+  font-size: 1.15rem !important;
+  font-weight: 650 !important;
+  color: var(--color-text) !important;
+  letter-spacing: -0.01em;
+  margin: 1.25rem 0 0.75rem 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-spacer {
+  height: 1.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   3. TOP NAVIGATION BAR
+   -------------------------------------------------------------------------- */
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
+}
+
 .navbar-brand {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--color-primary);
-  padding-top: 0.4rem;
-}
-
-.stButton > button {
-  background-color: transparent;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  color: var(--color-text-muted);
-  font-family: var(--font-body);
-  font-weight: 500;
-  padding: 0.45rem 1rem;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.stButton > button:hover {
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-  border-color: transparent;
-}
-
-.stButton > button:disabled {
-  background-color: var(--color-primary);
-  color: #FFFFFF;
-  opacity: 1;
-  border-color: var(--color-primary);
+  font-family: var(--font-sans) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--color-primary) !important;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
 }
 
 .navbar-divider {
   border: none;
   border-top: 1px solid var(--color-border);
-  margin: 0.75rem 0 1.75rem 0;
+  margin: 0.65rem 0 1.25rem 0;
 }
 
-/* Hero */
-.hero-title {
-  font-family: var(--font-display);
-  font-size: 2.75rem;
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-  color: var(--color-text);
+/* Navigation button styling in navbar */
+.stButton > button {
+  font-family: var(--font-sans) !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--color-border) !important;
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  padding: 0.4rem 0.75rem !important;
+  min-height: 38px !important;
+  transition: all 0.15s ease-in-out !important;
+  box-shadow: none !important;
 }
 
-.hero-tagline {
-  font-size: 1.05rem;
-  color: var(--color-text-muted);
-  margin-bottom: 0.9rem;
+.stButton > button:hover {
+  background-color: var(--color-primary-soft) !important;
+  color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-border) !important;
 }
+
+/* Active navigation item (Streamlit renders current page button as disabled) */
+.stButton > button:disabled {
+  background-color: var(--color-primary-soft) !important;
+  color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary) !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  cursor: default !important;
+}
+
+/* Form Submit Button */
+.stFormSubmitButton > button {
+  background-color: var(--color-primary) !important;
+  color: #FFFFFF !important;
+  border: 1px solid var(--color-primary-dark) !important;
+  font-weight: 600 !important;
+  padding: 0.55rem 1.4rem !important;
+  border-radius: var(--radius-md) !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.stFormSubmitButton > button:hover {
+  background-color: var(--color-primary-dark) !important;
+  color: #FFFFFF !important;
+  border-color: var(--color-primary-dark) !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. STATUS INDICATORS & BADGES
+   -------------------------------------------------------------------------- */
 
 .status-dot-row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
 }
 
 .status-dot {
@@ -112,162 +227,120 @@ footer { visibility: hidden; }
   border-radius: 50%;
   background-color: var(--color-good);
   display: inline-block;
+  flex-shrink: 0;
 }
 
-.status-dot-label {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+.status-dot-warning { background-color: var(--color-warning); }
+.status-dot-alert { background-color: var(--color-alert); }
+.status-dot-info { background-color: var(--color-info); }
+.status-dot-offline { background-color: var(--color-text-muted); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.22rem 0.65rem;
+  border-radius: var(--radius-pill);
+  line-height: 1.2;
+  letter-spacing: 0.02em;
 }
 
-.section-spacer {
-  height: 2.25rem;
+.badge-good {
+  background-color: var(--color-good-soft);
+  color: var(--color-good);
+  border: 1px solid var(--color-good-border);
 }
 
-/* Metric cards */
+.badge-warning {
+  background-color: var(--color-warning-soft);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+
+.badge-alert, .badge-critical {
+  background-color: var(--color-alert-soft);
+  color: var(--color-alert);
+  border: 1px solid var(--color-alert-border);
+}
+
+.badge-info {
+  background-color: var(--color-info-soft);
+  color: var(--color-info);
+  border: 1px solid var(--color-info-border);
+}
+
+/* --------------------------------------------------------------------------
+   5. CARDS SYSTEM
+   -------------------------------------------------------------------------- */
+
 .metric-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-left: 4px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: 1.5rem 1.5rem 1.25rem 1.4rem;
+  padding: 1rem 1.15rem;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.metric-card-good { border-left-color: var(--color-good); }
-.metric-card-warning { border-left-color: var(--color-warning); }
-.metric-card-alert { border-left-color: var(--color-alert); }
+.metric-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.metric-card-good { border-top: 3px solid var(--color-good); }
+.metric-card-warning { border-top: 3px solid var(--color-warning); }
+.metric-card-alert { border-top: 3px solid var(--color-alert); }
+.metric-card-info { border-top: 3px solid var(--color-info); }
 
 .metric-card-title {
-  font-size: 0.95rem;
-  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   margin-bottom: 0.35rem;
 }
 
 .metric-card-value {
-  font-family: var(--font-display);
-  font-size: 2.1rem;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 0.6rem;
+  line-height: 1.2;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.02em;
 }
-
-.badge {
-  display: inline-block;
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.25rem 0.7rem;
-  border-radius: 999px;
-  margin-bottom: 0.8rem;
-}
-
-.badge-good { background-color: var(--color-good-soft); color: var(--color-good); }
-.badge-warning { background-color: var(--color-warning-soft); color: var(--color-warning); }
-.badge-alert { background-color: var(--color-alert-soft); color: var(--color-alert); }
 
 .metric-progress-track {
   width: 100%;
-  height: 8px;
-  border-radius: 999px;
+  height: 6px;
+  border-radius: var(--radius-pill);
   background-color: var(--color-surface-alt);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-subtle);
   overflow: hidden;
-  margin-bottom: 0.9rem;
+  margin: 0.4rem 0 0.5rem 0;
 }
 
 .metric-progress-fill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .metric-progress-good { background-color: var(--color-good); }
 .metric-progress-warning { background-color: var(--color-warning); }
 .metric-progress-alert { background-color: var(--color-alert); }
+.metric-progress-info { background-color: var(--color-info); }
 
 .metric-card-description {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  line-height: 1.45;
+  margin: 0.25rem 0 0 0;
 }
-
-/* Assistant */
-.assistant-title {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-}
-
-.assistant-subtitle {
-  color: var(--color-text-muted);
-  margin-bottom: 1.1rem;
-}
-
-/* Placeholder pages */
-.placeholder-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  padding: 3rem 2rem;
-  text-align: left;
-  max-width: 560px;
-  margin-top: 1.5rem;
-}
-
-.placeholder-title {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  margin-bottom: 0.6rem;
-}
-
-.placeholder-description {
-  color: var(--color-text);
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
-}
-
-.placeholder-note {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-/* Chat bubbles */
-[data-testid="stChatMessage"] {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 0.4rem 0.6rem;
-  margin-bottom: 0.6rem;
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-  .hero-title { font-size: 2.1rem; }
-  .navbar-brand { font-size: 1.25rem; }
-  .block-container { padding-top: 1.5rem; }
-}
-
-/* Forms and Action Buttons */
-.stFormSubmitButton > button {
-  background-color: var(--color-primary) !important;
-  color: #FFFFFF !important;
-  border-radius: var(--radius-md) !important;
-  padding: 0.6rem 1.5rem !important;
-  font-weight: 600 !important;
-  font-size: 1rem !important;
-  transition: background-color 0.2s ease;
-}
-
-.stFormSubmitButton > button:hover {
-  background-color: #16433b !important;
-}
-
-/* ==========================================================================
-   SIH-Grade Home Dashboard UI Components
-   ========================================================================== */
 
 /* Farm Health Hero Card */
 .farm-health-hero {
@@ -275,237 +348,145 @@ footer { visibility: hidden; }
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: 1.4rem 1.6rem;
-  margin-bottom: 1.25rem;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
   position: relative;
-  overflow: hidden;
 }
 
-.farm-health-hero-good {
-  border-left: 6px solid var(--color-good);
-  background: linear-gradient(135deg, var(--color-surface) 88%, #f0f7f2 100%);
-}
-
-.farm-health-hero-warning {
-  border-left: 6px solid var(--color-warning);
-  background: linear-gradient(135deg, var(--color-surface) 88%, #fff9f0 100%);
-}
-
-.farm-health-hero-alert {
-  border-left: 6px solid var(--color-alert);
-  background: linear-gradient(135deg, var(--color-surface) 88%, #fdf2ed 100%);
-}
-
-.farm-health-hero-critical {
-  border-left: 6px solid #991b1b;
-  background: linear-gradient(135deg, var(--color-surface) 88%, #fee2e2 100%);
-}
+.farm-health-hero-good { border-left: 5px solid var(--color-good); }
+.farm-health-hero-warning { border-left: 5px solid var(--color-warning); }
+.farm-health-hero-alert { border-left: 5px solid var(--color-alert); }
+.farm-health-hero-critical { border-left: 5px solid var(--color-alert); }
 
 .farm-health-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
 }
 
 .farm-health-title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.farm-health-badge {
-  font-size: 0.88rem;
-  font-weight: 600;
-  padding: 0.32rem 0.85rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--color-primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .farm-health-summary {
-  font-size: 1.02rem;
+  font-size: 1rem;
   line-height: 1.5;
   color: var(--color-text);
-  margin-top: 0.35rem;
-  margin-bottom: 0.2rem;
+  margin-top: 0.25rem;
 }
 
 /* Action Hero Card ("What Should I Do Now?") */
 .action-hero-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-primary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: 1.4rem 1.6rem;
-  margin-bottom: 1.5rem;
-  border-top: 4px solid var(--color-primary);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.25rem;
 }
 
 .action-hero-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
 .action-hero-title {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 650;
   color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .action-headline {
-  font-size: 1.18rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
 }
 
 .action-explanation {
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   color: var(--color-text);
   line-height: 1.5;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
 }
 
 .action-secondary-box {
   background-color: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0.65rem 0.95rem;
-  font-size: 0.9rem;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.88rem;
   color: var(--color-text);
   line-height: 1.45;
 }
 
-/* Farm Conditions 3-Card Display */
-.condition-card-v2 {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  padding: 1.3rem 1.3rem 1.15rem 1.3rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.condition-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.45rem;
-}
-
-.condition-card-label {
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-}
-
-.condition-card-val-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  margin-bottom: 0.4rem;
-}
-
-.condition-card-num {
-  font-family: var(--font-display);
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: var(--color-text);
-  line-height: 1.1;
-}
-
-.condition-card-desc {
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
-  line-height: 1.4;
-  margin: 0;
-}
-
-/* Quick Farm Insights Grid */
-.insights-header {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 0.85rem;
-}
-
+/* Insight Card */
 .insight-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 1rem 1.1rem;
-  box-shadow: 0 1px 3px rgba(35, 39, 31, 0.04);
+  padding: 0.95rem 1rem;
+  box-shadow: var(--shadow-subtle);
   height: 100%;
 }
 
 .insight-title {
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 650;
   color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   margin-bottom: 0.35rem;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
 }
 
 .insight-body {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: var(--color-text);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-/* Chatbot Section Header & Suggested Chips */
-.chatbot-container {
+/* Home Weather Banner */
+.home-weather-banner {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  padding: 1.6rem 1.6rem;
-  margin-top: 1.5rem;
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-subtle);
 }
 
-.chips-label {
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-/* =========================================================================
-   Crop Health / Vision Styles
-   ========================================================================= */
+/* --------------------------------------------------------------------------
+   6. CROP VISION / HEALTH STYLES
+   -------------------------------------------------------------------------- */
 
 .vision-header-title {
-  font-family: var(--font-display);
-  font-size: 2.25rem;
-  font-weight: 600;
+  font-size: 1.6rem;
+  font-weight: 700;
   color: var(--color-text);
   margin-bottom: 0.2rem;
+  letter-spacing: -0.02em;
 }
 
 .vision-header-subtitle {
-  font-size: 1.05rem;
-  color: var(--color-text-muted);
-  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
   line-height: 1.45;
 }
 
@@ -514,68 +495,65 @@ footer { visibility: hidden; }
   align-items: center;
   gap: 0.5rem;
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  border-radius: 999px;
-  padding: 0.35rem 0.95rem;
-  font-size: 0.88rem;
+  color: var(--color-primary-dark);
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.85rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .vision-guidance-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
 }
 
 .vision-guidance-item {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
-  font-size: 0.88rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
   color: var(--color-text);
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 1px 2px rgba(35, 39, 31, 0.04);
+  gap: 0.45rem;
+  box-shadow: var(--shadow-subtle);
 }
 
 .vision-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 1.6rem;
+  padding: 1.35rem;
   box-shadow: var(--shadow-card);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .vision-result-healthy {
-  border-left: 6px solid var(--color-good);
-  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-good-soft) 100%);
+  border-left: 5px solid var(--color-good);
 }
 
 .vision-result-warning {
-  border-left: 6px solid var(--color-warning);
-  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-warning-soft) 100%);
+  border-left: 5px solid var(--color-warning);
 }
 
 .vision-result-rejected {
-  border-left: 6px solid var(--color-alert);
-  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-alert-soft) 100%);
+  border-left: 5px solid var(--color-alert);
 }
 
 .vision-badge-high {
   display: inline-block;
   background-color: var(--color-good-soft);
   color: var(--color-good);
-  border: 1px solid var(--color-good);
-  border-radius: 999px;
-  padding: 0.2rem 0.65rem;
-  font-size: 0.82rem;
+  border: 1px solid var(--color-good-border);
+  border-radius: var(--radius-pill);
+  padding: 0.18rem 0.6rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
@@ -583,10 +561,10 @@ footer { visibility: hidden; }
   display: inline-block;
   background-color: var(--color-warning-soft);
   color: var(--color-warning);
-  border: 1px solid var(--color-warning);
-  border-radius: 999px;
-  padding: 0.2rem 0.65rem;
-  font-size: 0.82rem;
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-pill);
+  padding: 0.18rem 0.6rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
@@ -594,10 +572,10 @@ footer { visibility: hidden; }
   display: inline-block;
   background-color: var(--color-alert-soft);
   color: var(--color-alert);
-  border: 1px solid var(--color-alert);
-  border-radius: 999px;
-  padding: 0.2rem 0.65rem;
-  font-size: 0.82rem;
+  border: 1px solid var(--color-alert-border);
+  border-radius: var(--radius-pill);
+  padding: 0.18rem 0.6rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
@@ -605,54 +583,56 @@ footer { visibility: hidden; }
   background-color: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 1rem 1.2rem;
-  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  margin-top: 0.85rem;
 }
 
 .vision-disclaimer {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
-  line-height: 1.4;
-  margin-top: 1rem;
-  padding-top: 0.75rem;
+  line-height: 1.45;
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
   border-top: 1px dashed var(--color-border);
 }
 
-/* =========================================================================
-   Weather & Climate Intelligence Styles (Phase 6)
-   ========================================================================= */
+/* --------------------------------------------------------------------------
+   7. WEATHER & FORECAST STYLES
+   -------------------------------------------------------------------------- */
 
 .weather-header-title {
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
+  letter-spacing: -0.02em;
 }
 
 .weather-header-subtitle {
   font-size: 0.95rem;
-  color: var(--color-text-muted);
-  margin-bottom: 1.25rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
 }
 
 .weather-context-banner {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1.2rem;
-  margin-bottom: 1.25rem;
+  padding: 0.75rem 1.1rem;
+  margin-bottom: 1rem;
   font-weight: 500;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-subtle);
+  font-size: 0.9rem;
 }
 
 .weather-badge-demo {
   display: inline-block;
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  border-radius: 999px;
-  padding: 0.2rem 0.65rem;
-  font-size: 0.8rem;
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 0.18rem 0.6rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
@@ -660,10 +640,10 @@ footer { visibility: hidden; }
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 1rem 0.85rem;
-  box-shadow: var(--shadow-card);
+  padding: 0.85rem 0.75rem;
+  box-shadow: var(--shadow-subtle);
   text-align: center;
-  transition: transform 0.2s ease;
+  transition: transform 0.15s ease;
 }
 
 .weather-metric-card:hover {
@@ -671,12 +651,12 @@ footer { visibility: hidden; }
 }
 
 .weather-metric-label {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
 }
 
 .weather-metric-value {
@@ -687,80 +667,64 @@ footer { visibility: hidden; }
 }
 
 .weather-metric-sub {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--color-text-muted);
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
 }
 
 .weather-action-hero {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 1.3rem 1.5rem;
+  padding: 1.15rem 1.35rem;
   box-shadow: var(--shadow-card);
   margin-bottom: 1rem;
 }
 
-.weather-action-good {
-  border-left: 6px solid var(--color-good);
-  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-good-soft) 100%);
-}
-
-.weather-action-warning {
-  border-left: 6px solid var(--color-warning);
-  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-warning-soft) 100%);
-}
-
-.weather-action-alert {
-  border-left: 6px solid var(--color-alert);
-  background: linear-gradient(135deg, var(--color-surface) 90%, var(--color-alert-soft) 100%);
-}
+.weather-action-good { border-left: 5px solid var(--color-good); }
+.weather-action-warning { border-left: 5px solid var(--color-warning); }
+.weather-action-alert { border-left: 5px solid var(--color-alert); }
 
 .weather-action-badge {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
-  margin-bottom: 0.4rem;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.35rem;
 }
 
 .weather-action-headline {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.35rem;
 }
 
 .weather-action-detail {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--color-text);
   line-height: 1.5;
-}
-
-.weather-section-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 1.2rem 0 0.8rem 0;
 }
 
 .weather-impact-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 1rem 1.25rem;
-  box-shadow: var(--shadow-card);
+  padding: 0.95rem 1.15rem;
+  box-shadow: var(--shadow-subtle);
 }
 
 .weather-impact-heading {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 650;
   color: var(--color-text);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
 }
 
 .weather-impact-body {
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  color: var(--color-text-secondary);
   line-height: 1.45;
 }
 
@@ -768,10 +732,10 @@ footer { visibility: hidden; }
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 1.1rem 0.85rem;
+  padding: 0.95rem 0.75rem;
   text-align: center;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.2s ease;
+  box-shadow: var(--shadow-subtle);
+  transition: transform 0.15s ease;
 }
 
 .forecast-card:hover {
@@ -779,106 +743,93 @@ footer { visibility: hidden; }
 }
 
 .forecast-day-header {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 650;
   color: var(--color-text);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
 }
 
 .forecast-condition-icon {
-  font-size: 2rem;
-  margin: 0.2rem 0;
+  font-size: 1.75rem;
+  margin: 0.15rem 0;
 }
 
 .forecast-condition-name {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  color: var(--color-text-muted);
-  margin-bottom: 0.4rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.35rem;
 }
 
 .forecast-temp-range {
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 700;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.35rem;
 }
 
-.forecast-temp-max {
-  color: var(--color-text);
-}
-
-.forecast-temp-min {
-  color: var(--color-text-muted);
-  font-weight: 500;
-}
+.forecast-temp-max { color: var(--color-text); }
+.forecast-temp-min { color: var(--color-text-muted); font-weight: 500; }
 
 .forecast-rain-pill {
   display: inline-block;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 0.15rem 0.6rem;
-  font-size: 0.78rem;
+  border-radius: var(--radius-pill);
+  padding: 0.12rem 0.55rem;
+  font-size: 0.76rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .forecast-advisory-text {
   font-size: 0.78rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   line-height: 1.35;
 }
 
 .weather-risk-banner {
   background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0.95rem 1.25rem;
-  margin-bottom: 0.75rem;
-  box-shadow: var(--shadow-card);
+  padding: 0.85rem 1.15rem;
+  margin-bottom: 0.65rem;
+  box-shadow: var(--shadow-subtle);
 }
 
-.risk-sev-alert {
-  border-left: 5px solid var(--color-alert);
-}
-
-.risk-sev-warning {
-  border-left: 5px solid var(--color-warning);
-}
-
-.risk-sev-info {
-  border-left: 5px solid var(--color-primary);
-}
+.risk-sev-alert { border-left: 4px solid var(--color-alert); }
+.risk-sev-warning { border-left: 4px solid var(--color-warning); }
+.risk-sev-info { border-left: 4px solid var(--color-info); }
 
 .weather-risk-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.25rem;
 }
 
 .weather-risk-title {
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 650;
+  font-size: 0.92rem;
   color: var(--color-text);
 }
 
 .weather-risk-badge {
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  padding: 0.12rem 0.45rem;
+  border-radius: var(--radius-pill);
   background-color: var(--color-surface-alt);
   color: var(--color-text);
   border: 1px solid var(--color-border);
 }
 
 .weather-risk-desc {
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
-  margin-bottom: 0.35rem;
+  font-size: 0.86rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.25rem;
 }
 
 .weather-risk-mitigation {
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   color: var(--color-text);
 }
 
@@ -886,25 +837,265 @@ footer { visibility: hidden; }
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 1rem 1.25rem;
+  padding: 0.95rem 1.15rem;
   color: var(--color-good);
   font-weight: 500;
+  font-size: 0.92rem;
 }
 
 .weather-assistant-box {
   background-color: var(--color-surface-alt);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 1.1rem 1.3rem;
+  padding: 0.95rem 1.15rem;
   margin-top: 0.5rem;
 }
 
-.home-weather-banner {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-left: 5px solid var(--color-primary);
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1.25rem;
-  margin-bottom: 1.25rem;
-  box-shadow: var(--shadow-card);
+/* --------------------------------------------------------------------------
+   8. CHATBOT COMPONENT (High Readability & Dark Text)
+   -------------------------------------------------------------------------- */
+
+.assistant-title {
+  font-family: var(--font-sans) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--color-text) !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.assistant-subtitle {
+  font-size: 0.9rem !important;
+  color: var(--color-text-secondary) !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Streamlit Chat Message Bubbles */
+[data-testid="stChatMessage"] {
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.75rem 1rem !important;
+  margin-bottom: 0.65rem !important;
+  box-shadow: var(--shadow-subtle) !important;
+}
+
+/* User Message: subtle light neutral surface with crisp dark text */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]),
+[data-testid="stChatMessage"][data-role="user"] {
+  background-color: #EEF2F0 !important;
+  border-color: #DDE4E0 !important;
+  color: #17211F !important;
+}
+
+/* Assistant Message: very light green-tinted surface with dark readable text */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]),
+[data-testid="stChatMessage"][data-role="assistant"] {
+  background-color: #F4F8F6 !important;
+  border-color: #D3E0DA !important;
+  border-left: 3px solid #1F5C52 !important;
+  color: #17211F !important;
+}
+
+[data-testid="stChatMessage"] p, [data-testid="stChatMessage"] div {
+  color: #17211F !important;
+  font-size: 0.92rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Chat Input Bar */
+[data-testid="stChatInput"] {
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+[data-testid="stChatInput"]:focus-within {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px var(--color-primary-soft) !important;
+}
+
+[data-testid="stChatInput"] textarea {
+  color: #17211F !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.92rem !important;
+  background-color: transparent !important;
+}
+
+[data-testid="stChatInput"] textarea::placeholder {
+  color: #66736F !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. NATIVE STREAMLIT WIDGET STYLING
+   -------------------------------------------------------------------------- */
+
+/* Inputs & Textareas */
+[data-baseweb="input"], [data-baseweb="base-input"] {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--color-text) !important;
+}
+
+[data-baseweb="input"]:focus-within, [data-baseweb="base-input"]:focus-within {
+  border-color: var(--color-primary) !important;
+}
+
+[data-baseweb="input"] input, [data-baseweb="base-input"] input, textarea {
+  color: var(--color-text) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.92rem !important;
+}
+
+/* Selectbox */
+[data-baseweb="select"] > div {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--color-text) !important;
+}
+
+[data-baseweb="select"] span {
+  color: var(--color-text) !important;
+  font-size: 0.9rem !important;
+}
+
+/* Popover & Dropdown menus */
+[data-baseweb="popover"], [data-baseweb="menu"], [data-baseweb="menu"] ul {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+[data-baseweb="menu"] li {
+  color: var(--color-text) !important;
+  font-size: 0.9rem !important;
+}
+
+[data-baseweb="menu"] li:hover, [data-baseweb="menu"] li[aria-selected="true"] {
+  background-color: var(--color-primary-soft) !important;
+  color: var(--color-primary-dark) !important;
+}
+
+/* Expanders */
+[data-testid="stExpander"] {
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-subtle) !important;
+  margin-top: 0.75rem !important;
+}
+
+[data-testid="stExpander"] summary {
+  color: var(--color-text) !important;
+  font-weight: 600 !important;
+  font-size: 0.92rem !important;
+  padding: 0.75rem 1rem !important;
+}
+
+[data-testid="stExpander"] summary:hover {
+  color: var(--color-primary) !important;
+}
+
+/* Tabs */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+  gap: var(--space-xs) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+[data-testid="stTabs"] [data-baseweb="tab"] {
+  padding: 0.5rem 1rem !important;
+  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+  color: var(--color-text-secondary) !important;
+  border-bottom: 2px solid transparent !important;
+}
+
+[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {
+  color: var(--color-primary) !important;
+  border-bottom-color: var(--color-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Alerts (st.info, st.success, st.warning, st.error) */
+[data-testid="stAlert"] {
+  border-radius: var(--radius-md) !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 0.9rem !important;
+  border-width: 1px !important;
+}
+
+/* File Uploader */
+[data-testid="stFileUploader"] {
+  background-color: var(--color-surface) !important;
+  border: 1px dashed var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 1.25rem !important;
+}
+
+/* --------------------------------------------------------------------------
+   10. RESPONSIVE / MOBILE RULES
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .block-container {
+    padding-top: 1rem !important;
+    padding-bottom: 2.5rem !important;
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+  }
+
+  .hero-title {
+    font-size: 1.45rem !important;
+  }
+
+  .hero-tagline {
+    font-size: 0.88rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .metric-card-value {
+    font-size: 1.5rem !important;
+  }
+
+  .metric-card {
+    padding: 0.85rem 1rem !important;
+    margin-bottom: 0.65rem !important;
+  }
+
+  /* Buttons on mobile: easy tap target */
+  .stButton > button {
+    padding: 0.45rem 0.65rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Allow chat bubbles to use full width */
+  [data-testid="stChatMessage"] {
+    padding: 0.65rem 0.85rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.3rem !important;
+  }
+
+  .navbar-brand {
+    font-size: 1.1rem !important;
+  }
+
+  .action-headline {
+    font-size: 1.05rem !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11. ACCESSIBILITY & FOCUS STATES
+   -------------------------------------------------------------------------- */
+
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
 }
