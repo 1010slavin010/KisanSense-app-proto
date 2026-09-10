@@ -25,4 +25,7 @@ NAV_ITEMS = [
     ("vision", "Vision"),
     ("assistant", "Assistant"),
     ("alerts", "Alerts"),
+    ("devices", "Devices"),
+    ("analytics", "Analytics"),
 ]
+

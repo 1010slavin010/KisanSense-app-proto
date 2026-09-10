@@ -322,8 +322,114 @@ def get_ai_response(message: str, context: dict[str, Any] | None = None) -> str:
         )
 
     # =========================================================================
+    # 2b. Specific Action & Soil Diagnostics Inquiries
+    # =========================================================================
+    # "Why is the soil dry?"
+    why_dry_triggers = (
+        "why is the soil dry",
+        "why is soil dry",
+        "why is it dry",
+        "why dry soil",
+    )
+    if any(trigger in norm_text for trigger in why_dry_triggers):
+        if not sensor_online:
+            return (
+                f"Your soil probe is currently **offline**, so real-time soil moisture is unavailable for {crop_desc}. "
+                "Please inspect the probe connection and verify soil moisture manually."
+            )
+        if soil_moisture is not None:
+            if soil_moisture < 30.0:
+                temp_str = f" and ambient temperature is elevated ({temperature:.0f}°C)" if temperature and temperature > 30.0 else ""
+                return (
+                    f"🌱 **Soil Moisture Deficit ({soil_moisture:.0f}%)**:\n\n"
+                    f"Topsoil and root-zone moisture has dropped below the 30% healthy threshold{temp_str}, "
+                    f"indicating natural crop transpiration and surface evaporation have depleted available soil water for {crop_desc}.\n\n"
+                    f"💡 **Action**: Irrigation is recommended to replenish the root zone before plant wilting occurs."
+                )
+            else:
+                return (
+                    f"🌱 Currently, your soil moisture is **{soil_moisture:.0f}%**, which is actually in the healthy range (not dry!) for {crop_desc}. "
+                    "Routine monitoring is sufficient."
+                )
+        return "Soil moisture telemetry is currently unavailable. Check the Irrigation card for readings."
+
+    # "Why shouldn't I irrigate?" / "Why not irrigate?" / "Why no watering?"
+    why_no_water_triggers = (
+        "why shouldn t i irrigate",
+        "why shouldnt i irrigate",
+        "why not irrigate",
+        "why not water",
+        "why shouldn t i water",
+        "why shouldnt i water",
+        "why no water",
+        "why no irrigation",
+    )
+    if any(trigger in norm_text for trigger in why_no_water_triggers):
+        if not sensor_online:
+            return (
+                f"⚠️ **Irrigation is held because your soil probe is offline.**\n\n"
+                "KisanSense protects your field with an automatic fail-safe: automated watering is suspended whenever "
+                "telemetry is unreachable or faulted to prevent accidental waterlogging."
+            )
+        weather_ctx = ctx.get("weather")
+        rain_prob = getattr(weather_ctx, "rain_probability", 0) if weather_ctx else 0
+        if rain_prob >= 60:
+            return (
+                f"🌧️ **Irrigation is delayed because significant rainfall is forecasted ({rain_prob}% chance).**\n\n"
+                f"Holding off on watering for {crop_desc} conserves water and prevents over-saturation, root suffocation, "
+                "and nutrient leaching."
+            )
+        if soil_moisture is not None and soil_moisture >= 30.0:
+            status_word = "sufficiently wet" if soil_moisture > 60.0 else "in the optimal healthy range"
+            return (
+                f"🌱 **Irrigation is not required because soil moisture is currently {soil_moisture:.0f}%.**\n\n"
+                f"The soil is already {status_word} (30%–60%) for {crop_desc}. "
+                "Adding water now would waste resources and increase the risk of fungal root rot."
+            )
+        return (
+            f"Irrigation decisions depend on soil moisture (threshold 30%) and rain forecasts. "
+            f"Check current telemetry on the Home or Irrigation page."
+        )
+
+    # "What should I check today?"
+    check_today_triggers = (
+        "what should i check today",
+        "what to check today",
+        "daily check",
+        "today checklist",
+        "what should i inspect",
+    )
+    if any(trigger in norm_text for trigger in check_today_triggers):
+        items = []
+        if sensor_online and soil_moisture is not None:
+            sm_state = "Needs water" if soil_moisture < 30.0 else ("Wet" if soil_moisture > 60.0 else "Optimal")
+            items.append(f"1. 🌱 **Soil Moisture**: Current {soil_moisture:.0f}% ({sm_state}).")
+        else:
+            items.append("1. ⚠️ **Sensor Link**: Probe is offline. Inspect physical cable connection.")
+
+        weather_ctx = ctx.get("weather")
+        if weather_ctx:
+            r_prob = getattr(weather_ctx, "rain_probability", 0)
+            items.append(f"2. 🌤️ **Weather**: {getattr(weather_ctx, 'condition', 'Partly Cloudy')} (Rain: {r_prob}%).")
+        else:
+            items.append("2. 🌤️ **Weather**: Review the 3-day forecast in the Weather tab.")
+
+        if vision_result and getattr(vision_result, "success", False):
+            items.append(f"3. 🌿 **Foliar Health**: Latest screening shows {vision_result.diagnosis}.")
+        else:
+            items.append("3. 🌿 **Foliar Health**: Capture or upload a leaf in Crop Health to screen for early blight.")
+
+        items_str = "\n".join(items)
+        return (
+            f"📋 **Daily Agronomic Checklist for {crop_desc}**:\n\n"
+            f"{items_str}\n\n"
+            "💡 Tap any card on your Home dashboard for detailed guidance."
+        )
+
+    # =========================================================================
     # 3. Irrigation & Water Inquiries: "Should I water my crop?", "Is irrigation required?"
     # =========================================================================
+
     irrigation_triggers = (
         "water",
         "irrigat",

@@ -213,114 +213,143 @@ def _generate_deterministic_forecast(
     return [day1, day2, day3]
 
 
+class WeatherProvider:
+    """Protocol / interface for weather data providers (simulated or future REST API)."""
+
+    def get_weather(
+        self,
+        location: str | None = None,
+        condition_hint: str | None = None,
+    ) -> WeatherSnapshot:
+        """Fetch or generate a weather snapshot."""
+        raise NotImplementedError
+
+
+class SimulatedWeatherProvider(WeatherProvider):
+    """Deterministic, offline agrarian simulation weather provider."""
+
+    def get_weather(
+        self,
+        location: str | None = None,
+        condition_hint: str | None = None,
+    ) -> WeatherSnapshot:
+        now_str = datetime.now().strftime("%I:%M %p")
+        loc_clean = (location or "").strip()
+        loc_display = loc_clean if loc_clean else "Mandya, Karnataka"
+
+        # Location modulation
+        temp_offset = 0.0
+        loc_lower = loc_display.lower()
+        if any(h in loc_lower for h in ("shimla", "kashmir", "hill", "ooty", "manali")):
+            temp_offset = -9.0
+        elif any(h in loc_lower for h in ("rajasthan", "thar", "desert")):
+            temp_offset = +4.0
+        elif "punjab" in loc_lower:
+            temp_offset = +1.0
+
+        # Base profile modulation according to condition_hint or location hash
+        hint = (condition_hint or "").upper()
+
+        if "HUMID" in hint:
+            temp = 32.5 + temp_offset
+            feels = 36.0 + temp_offset
+            hum = 82.0
+            rain_prob = 45
+            rain_mm = 4.5
+            wind = 9.0
+            cond = "Humid & Overcast"
+            icon = "🌦"
+            summary = "Warm, high-humidity canopy conditions with intermittent light drizzle."
+        elif "WET" in hint or "WATERLOGGING" in hint:
+            temp = 24.5 + temp_offset
+            feels = 25.0 + temp_offset
+            hum = 88.0
+            rain_prob = 80
+            rain_mm = 24.0
+            wind = 18.0
+            cond = "Heavy Rain"
+            icon = "🌧"
+            summary = "Persistent rain showers with elevated atmospheric moisture."
+        elif "DRY" in hint:
+            temp = 31.0 + temp_offset
+            feels = 32.0 + temp_offset
+            hum = 38.0
+            rain_prob = 15
+            rain_mm = 0.0
+            wind = 12.0
+            cond = "Clear & Dry"
+            icon = "🌤"
+            summary = "Mild dry conditions with minimal cloud cover. No rainfall expected soon."
+        elif "HOT" in hint or "HEAT" in hint:
+            temp = 36.5 + temp_offset
+            feels = 39.0 + temp_offset
+            hum = 32.0
+            rain_prob = 10
+            rain_mm = 0.0
+            wind = 14.0
+            cond = "Hot & Sunny"
+            icon = "☀️"
+            summary = "Dry heatwave conditions with clear skies. Elevated crop evapotranspiration."
+        else:
+            # Default normal conditions: stable, comfortable agrarian climate
+            temp = 27.0 + temp_offset
+            feels = 27.5 + temp_offset
+            hum = 55.0
+            rain_prob = 20
+            rain_mm = 0.0
+            wind = 11.0
+            cond = "Partly Cloudy"
+            icon = "🌤"
+            summary = "Favorable farming weather with moderate sunlight and balanced humidity."
+
+        forecast_days = _generate_deterministic_forecast(
+            base_temp=temp,
+            base_humidity=hum,
+            base_rain_prob=rain_prob,
+            base_rain_mm=rain_mm,
+            base_wind=wind,
+            condition=cond,
+            icon=icon,
+        )
+
+        return WeatherSnapshot(
+            location=loc_display,
+            timestamp=now_str,
+            temperature=round(temp, 1),
+            feels_like=round(feels, 1),
+            humidity=round(hum, 1),
+            precipitation_probability=rain_prob,
+            precipitation_amount_mm=round(rain_mm, 1),
+            wind_speed_kmh=round(wind, 1),
+            wind_direction="NW",
+            weather_condition=cond,
+            condition_icon=icon,
+            forecast_summary=summary,
+            forecast_days=forecast_days,
+            is_demo=True,
+            source="demo_weather_simulator",
+            is_available=True,
+            error_message="",
+        )
+
+
+_DEFAULT_WEATHER_PROVIDER = SimulatedWeatherProvider()
+
+
 def get_weather_snapshot(
     location: str | None = None,
     condition_hint: str | None = None,
+    provider: WeatherProvider | None = None,
 ) -> WeatherSnapshot:
     """Retrieve weather data with deterministic agrarian simulation fallback.
 
     Args:
         location: Farm location string (e.g. "Nashik, Maharashtra").
         condition_hint: Optional simulation condition hint (e.g. "HOT", "WET", "DRY").
+        provider: Optional custom WeatherProvider implementation.
 
     Returns:
         Structured WeatherSnapshot with current conditions and 3-day forecast.
     """
-    now_str = datetime.now().strftime("%I:%M %p")
-    loc_clean = (location or "").strip()
-    loc_display = loc_clean if loc_clean else "Mandya, Karnataka"
-
-    # Location modulation
-    temp_offset = 0.0
-    loc_lower = loc_display.lower()
-    if any(h in loc_lower for h in ("shimla", "kashmir", "hill", "ooty", "manali")):
-        temp_offset = -9.0
-    elif any(h in loc_lower for h in ("rajasthan", "thar", "desert")):
-        temp_offset = +4.0
-    elif "punjab" in loc_lower:
-        temp_offset = +1.0
-
-    # Base profile modulation according to condition_hint or location hash
-    hint = (condition_hint or "").upper()
-
-    if "HUMID" in hint:
-        temp = 32.5 + temp_offset
-        feels = 36.0 + temp_offset
-        hum = 82.0
-        rain_prob = 45
-        rain_mm = 4.5
-        wind = 9.0
-        cond = "Humid & Overcast"
-        icon = "🌦"
-        summary = "Warm, high-humidity canopy conditions with intermittent light drizzle."
-    elif "WET" in hint or "WATERLOGGING" in hint:
-        temp = 24.5 + temp_offset
-        feels = 25.0 + temp_offset
-        hum = 88.0
-        rain_prob = 80
-        rain_mm = 24.0
-        wind = 18.0
-        cond = "Heavy Rain"
-        icon = "🌧"
-        summary = "Persistent rain showers with elevated atmospheric moisture."
-    elif "DRY" in hint:
-        temp = 31.0 + temp_offset
-        feels = 32.0 + temp_offset
-        hum = 38.0
-        rain_prob = 15
-        rain_mm = 0.0
-        wind = 12.0
-        cond = "Clear & Dry"
-        icon = "🌤"
-        summary = "Mild dry conditions with minimal cloud cover. No rainfall expected soon."
-    elif "HOT" in hint or "HEAT" in hint:
-        temp = 36.5 + temp_offset
-        feels = 39.0 + temp_offset
-        hum = 32.0
-        rain_prob = 10
-        rain_mm = 0.0
-        wind = 14.0
-        cond = "Hot & Sunny"
-        icon = "☀️"
-        summary = "Dry heatwave conditions with clear skies. Elevated crop evapotranspiration."
-    else:
-        # Default normal conditions: stable, comfortable agrarian climate
-        temp = 27.0 + temp_offset
-        feels = 27.5 + temp_offset
-        hum = 55.0
-        rain_prob = 20
-        rain_mm = 0.0
-        wind = 11.0
-        cond = "Partly Cloudy"
-        icon = "🌤"
-        summary = "Favorable farming weather with moderate sunlight and balanced humidity."
-
-    forecast_days = _generate_deterministic_forecast(
-        base_temp=temp,
-        base_humidity=hum,
-        base_rain_prob=rain_prob,
-        base_rain_mm=rain_mm,
-        base_wind=wind,
-        condition=cond,
-        icon=icon,
-    )
-
-    return WeatherSnapshot(
-        location=loc_display,
-        timestamp=now_str,
-        temperature=round(temp, 1),
-        feels_like=round(feels, 1),
-        humidity=round(hum, 1),
-        precipitation_probability=rain_prob,
-        precipitation_amount_mm=round(rain_mm, 1),
-        wind_speed_kmh=round(wind, 1),
-        wind_direction="NW",
-        weather_condition=cond,
-        condition_icon=icon,
-        forecast_summary=summary,
-        forecast_days=forecast_days,
-        is_demo=True,
-        source="demo_weather_simulator",
-        is_available=True,
-        error_message="",
-    )
+    active_provider = provider or _DEFAULT_WEATHER_PROVIDER
+    return active_provider.get_weather(location=location, condition_hint=condition_hint)

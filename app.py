@@ -10,7 +10,7 @@ from components.navbar import render_navbar
 from services.farm_service import init_farm_profile
 from utils.config import APP_NAME, PAGE_ICON
 from utils.translations import DEFAULT_LANG
-from views import alerts, assistance, farm, home, irrigation, vision, weather
+from views import alerts, analytics, assistance, devices, farm, home, irrigation, vision, weather
 
 PAGES = {
     "home": home,
@@ -20,7 +20,10 @@ PAGES = {
     "vision": vision,
     "assistant": assistance,
     "alerts": alerts,
+    "devices": devices,
+    "analytics": analytics,
 }
+
 
 
 def load_css(path: str) -> None:

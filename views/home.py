@@ -529,7 +529,45 @@ def render() -> None:
             unsafe_allow_html=True,
         )
 
-    st.markdown('<div style="height: 1.5rem;"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
+
+    # =========================================================================
+    # E2. QUICK ACTIONS (Scan Crop, Check Irrigation, View Alerts, Devices, Analytics)
+    # =========================================================================
+    st.markdown('<div class="insights-header">⚡ Quick Farm Actions</div>', unsafe_allow_html=True)
+    qa1, qa2, qa3, qa4, qa5, qa6 = st.columns(6)
+
+    with qa1:
+        if st.button("📷 Scan Crop", key="btn_qa_scan", use_container_width=True):
+            st.session_state.page = "vision"
+            st.rerun()
+
+    with qa2:
+        if st.button("💧 Irrigation", key="btn_qa_irrigation", use_container_width=True):
+            st.session_state.page = "irrigation"
+            st.rerun()
+
+    with qa3:
+        if st.button("🔔 View Alerts", key="btn_qa_alerts", use_container_width=True):
+            st.session_state.page = "alerts"
+            st.rerun()
+
+    with qa4:
+        if st.button("📡 Devices", key="btn_qa_devices", use_container_width=True):
+            st.session_state.page = "devices"
+            st.rerun()
+
+    with qa5:
+        if st.button("📈 Analytics", key="btn_qa_analytics", use_container_width=True):
+            st.session_state.page = "analytics"
+            st.rerun()
+
+    with qa6:
+        if st.button("💬 Assistant", key="btn_qa_assistant", use_container_width=True):
+            st.session_state.page = "assistant"
+            st.rerun()
+
+    st.markdown('<div style="height: 1.25rem;"></div>', unsafe_allow_html=True)
 
     # =========================================================================
     # F. ASK KISANSENSE: Chatbot with Suggested Question Chips
