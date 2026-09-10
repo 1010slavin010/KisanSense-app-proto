@@ -4,9 +4,12 @@ import unittest
 from services.sensor_simulator import (
     ALL_CONDITIONS,
     CONDITION_DRY,
+    CONDITION_HEAT_DROUGHT,
     CONDITION_HOT,
+    CONDITION_HUMID_HEAT,
     CONDITION_NORMAL,
     CONDITION_OFFLINE,
+    CONDITION_WATERLOGGING,
     CONDITION_WET,
     SensorSimulator,
 )
@@ -14,12 +17,15 @@ from services.sensor_simulator import (
 
 class TestSensorSimulator(unittest.TestCase):
     def test_all_conditions_defined(self):
-        self.assertEqual(len(ALL_CONDITIONS), 5)
+        self.assertEqual(len(ALL_CONDITIONS), 8)
         self.assertIn(CONDITION_NORMAL, ALL_CONDITIONS)
         self.assertIn(CONDITION_DRY, ALL_CONDITIONS)
         self.assertIn(CONDITION_WET, ALL_CONDITIONS)
         self.assertIn(CONDITION_HOT, ALL_CONDITIONS)
         self.assertIn(CONDITION_OFFLINE, ALL_CONDITIONS)
+        self.assertIn(CONDITION_HEAT_DROUGHT, ALL_CONDITIONS)
+        self.assertIn(CONDITION_WATERLOGGING, ALL_CONDITIONS)
+        self.assertIn(CONDITION_HUMID_HEAT, ALL_CONDITIONS)
 
     def test_normal_condition(self):
         reading = SensorSimulator.generate_reading(condition=CONDITION_NORMAL)
@@ -67,6 +73,28 @@ class TestSensorSimulator(unittest.TestCase):
             farm_context={"soil_type": "Clay Soil"},
         )
         self.assertTrue(reading_clay["soil_moisture"] > reading_sand["soil_moisture"])
+
+    def test_heat_drought_condition(self):
+        reading = SensorSimulator.generate_reading(condition=CONDITION_HEAT_DROUGHT)
+        self.assertTrue(reading["is_online"])
+        self.assertEqual(reading["condition"], CONDITION_HEAT_DROUGHT)
+        self.assertTrue(reading["soil_moisture"] < 25.0)
+        self.assertTrue(reading["temperature"] > 38.0)
+        self.assertTrue(reading["humidity"] < 35.0)
+
+    def test_waterlogging_condition(self):
+        reading = SensorSimulator.generate_reading(condition=CONDITION_WATERLOGGING)
+        self.assertTrue(reading["is_online"])
+        self.assertEqual(reading["condition"], CONDITION_WATERLOGGING)
+        self.assertTrue(reading["soil_moisture"] > 80.0)
+        self.assertTrue(reading["humidity"] > 80.0)
+
+    def test_humid_heat_condition(self):
+        reading = SensorSimulator.generate_reading(condition=CONDITION_HUMID_HEAT)
+        self.assertTrue(reading["is_online"])
+        self.assertEqual(reading["condition"], CONDITION_HUMID_HEAT)
+        self.assertTrue(reading["temperature"] > 35.0)
+        self.assertTrue(reading["humidity"] > 75.0)
 
 
 if __name__ == "__main__":

@@ -45,6 +45,13 @@ def render_chatbot() -> None:
             context["sensor_online"] = getattr(reading, "is_online", True)
             context["last_updated"] = getattr(reading, "last_updated", "")
             context["sensor_condition"] = getattr(reading, "condition", "NORMAL")
+            context["raw_status"] = getattr(reading, "raw_status", "ok")
+
+            try:
+                from services.farm_intelligence import evaluate_farm_intelligence
+                context["intelligence"] = evaluate_farm_intelligence(reading, farm_context=farm_ctx)
+            except Exception:
+                pass
 
         response = get_ai_response(prompt, context=context)
 

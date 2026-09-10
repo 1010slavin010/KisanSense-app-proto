@@ -19,12 +19,20 @@ CONDITION_WET = "WET"
 CONDITION_HOT = "HOT"
 CONDITION_OFFLINE = "SENSOR_OFFLINE"
 
+# Phase 5 Extended simulation scenarios
+CONDITION_HEAT_DROUGHT = "HEAT_DROUGHT"
+CONDITION_WATERLOGGING = "WATERLOGGING"
+CONDITION_HUMID_HEAT = "HUMID_HEAT"
+
 ALL_CONDITIONS: list[str] = [
     CONDITION_NORMAL,
     CONDITION_DRY,
     CONDITION_WET,
     CONDITION_HOT,
     CONDITION_OFFLINE,
+    CONDITION_HEAT_DROUGHT,
+    CONDITION_WATERLOGGING,
+    CONDITION_HUMID_HEAT,
 ]
 
 # Baseline profile targets: (soil_moisture, temperature, humidity)
@@ -34,6 +42,9 @@ PROFILE_BASELINES: dict[str, dict[str, float]] = {
     CONDITION_WET: {"soil_moisture": 72.0, "temperature": 22.0, "humidity": 82.0},
     CONDITION_HOT: {"soil_moisture": 29.0, "temperature": 39.0, "humidity": 28.0},
     CONDITION_OFFLINE: {"soil_moisture": 0.0, "temperature": 0.0, "humidity": 0.0},
+    CONDITION_HEAT_DROUGHT: {"soil_moisture": 18.0, "temperature": 41.5, "humidity": 24.0},
+    CONDITION_WATERLOGGING: {"soil_moisture": 88.0, "temperature": 23.0, "humidity": 88.0},
+    CONDITION_HUMID_HEAT: {"soil_moisture": 48.0, "temperature": 37.5, "humidity": 84.0},
 }
 
 # Agronomic physical retention offsets

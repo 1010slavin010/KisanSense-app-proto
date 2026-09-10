@@ -24,13 +24,17 @@ from services.telemetry_server import (
     is_telemetry_server_running,
     start_telemetry_server,
 )
+from services.farm_intelligence import evaluate_farm_intelligence
 from services.sensor_service import (
     ALL_CONDITIONS,
     ALL_MODES,
     CONDITION_DRY,
+    CONDITION_HEAT_DROUGHT,
     CONDITION_HOT,
+    CONDITION_HUMID_HEAT,
     CONDITION_NORMAL,
     CONDITION_OFFLINE,
+    CONDITION_WATERLOGGING,
     CONDITION_WET,
     MODE_HARDWARE,
     MODE_SIMULATION,
@@ -182,6 +186,55 @@ def render() -> None:
             f"(Soil moisture is at {format_percent(reading.soil_moisture)})."
         )
 
+    # Farm Intelligence Advisory Card
+    intel = evaluate_farm_intelligence(reading, farm_context=farm_ctx)
+
+    intel_border_class = (
+        f"metric-card-{intel.primary_severity}"
+        if intel.primary_severity in ("good", "warning", "alert")
+        else "metric-card-alert"
+    )
+    intel_badge_class = (
+        f"badge-{intel.primary_severity}"
+        if intel.primary_severity in ("good", "warning", "alert")
+        else "badge-alert"
+    )
+
+    status_keys = {
+        "Optimal Conditions": "intel_status_optimal",
+        "Attention Needed": "intel_status_attention",
+        "Action Recommended": "intel_status_action",
+        "Action Required": "intel_status_action_required",
+        "Sensor Offline": "intel_status_offline",
+        "Hardware Fault Detected": "intel_status_fault",
+        "Invalid Telemetry": "intel_status_fault",
+        "Stale Telemetry": "intel_status_attention",
+    }
+    status_label_text = t(status_keys.get(intel.primary_status, "intel_status_attention"))
+    rec_action_text = intel.conditions[0].recommended_action if intel.conditions else ""
+
+    st.markdown(
+        f"""
+        <div class="metric-card {intel_border_class}" style="margin-bottom: 1.5rem; padding: 1.2rem 1.4rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="font-weight: 600; font-size: 1.05rem; color: var(--color-primary); display: flex; align-items: center; gap: 0.4rem;">
+                    🧠 {t("intel_card_title")}
+                </div>
+                <span class="badge {intel_badge_class}" style="font-size: 0.85rem; padding: 0.3rem 0.75rem;">
+                    {status_label_text}
+                </span>
+            </div>
+            <div style="font-size: 0.96rem; line-height: 1.45; margin-bottom: 0.7rem; color: var(--color-text);">
+                {intel.overall_summary}
+            </div>
+            <div style="background-color: var(--color-surface-alt); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.65rem 0.95rem; font-size: 0.88rem;">
+                <span style="font-weight: 600; color: var(--color-primary);">💡 {t("intel_action_label")}:</span> {rec_action_text}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     # Metric cards row: Soil Moisture, Temperature, Air Humidity, Irrigation
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -282,6 +335,9 @@ def render() -> None:
                         CONDITION_WET: t("sim_wet"),
                         CONDITION_HOT: t("sim_hot"),
                         CONDITION_OFFLINE: t("sim_offline"),
+                        CONDITION_HEAT_DROUGHT: t("sim_heat_drought"),
+                        CONDITION_WATERLOGGING: t("sim_waterlogging"),
+                        CONDITION_HUMID_HEAT: t("sim_humid_heat"),
                     }
                     current_cond = st.session_state.get("sim_condition", CONDITION_NORMAL)
                     cond_idx = ALL_CONDITIONS.index(current_cond) if current_cond in ALL_CONDITIONS else 0

@@ -35,11 +35,31 @@ def get_ai_response(message: str, context: dict[str, Any] | None = None) -> str:
     humidity = ctx.get("humidity")
     sensor_online = ctx.get("sensor_online", True)
     last_updated = ctx.get("last_updated", "")
+    intel = ctx.get("intelligence")
+
+    # If intelligence indicates offline, faulted, or invalid data, honor safety
+    if intel and getattr(intel, "data_quality", "reliable") in ("offline", "fault"):
+        sensor_online = False
 
     # Construct descriptive crop descriptor if available
     crop_desc = f"**{crop}**" if crop else "your crop"
     if crop and variety:
         crop_desc = f"**{crop} ({variety})**"
+
+    # 0. Farm Health & Decision Engine inquiries
+    if any(keyword in text for keyword in ("how is my farm", "farm health", "crop health", "farm condition", "what should i do", "any risk", "any problem", "status of my farm", "recommendation")):
+        if intel:
+            if getattr(intel, "data_quality", "reliable") != "reliable":
+                return (
+                    f"**Farm Status: {intel.primary_status}**\n\n"
+                    f"{intel.overall_summary}\n\n"
+                    f"⚠️ Real-time telemetry is currently **{intel.data_quality}**, so automated conclusions are suspended. "
+                    "Please inspect your field sensors and verify field soil moisture manually."
+                )
+            return (
+                f"**Farm Status: {intel.primary_status}**\n\n"
+                f"{intel.overall_summary}"
+            )
 
     # 1. Sensor status and connectivity inquiries
     if any(keyword in text for keyword in ("sensor working", "sensor online", "sensor offline", "sensor status", "is my sensor", "telemetry")):

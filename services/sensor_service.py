@@ -16,9 +16,12 @@ from services.hardware_client import HardwareClient
 from services.sensor_simulator import (
     ALL_CONDITIONS,
     CONDITION_DRY,
+    CONDITION_HEAT_DROUGHT,
     CONDITION_HOT,
+    CONDITION_HUMID_HEAT,
     CONDITION_NORMAL,
     CONDITION_OFFLINE,
+    CONDITION_WATERLOGGING,
     CONDITION_WET,
     SensorSimulator,
 )
