@@ -192,7 +192,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "vision_urgency_moderate": "Moderate",
         "vision_urgency_immediate": "Immediate Attention",
         # Weather & Climate Intelligence
-        "weather_page_title": "Weather & Climate Intelligence",
+        "weather_page_title": "Farm Weather",
         "weather_page_subtitle": "Agrarian forecast and microclimate impact connected to your farm sensors.",
         "weather_demo_mode_badge": "Demo Weather Simulator",
         "weather_farm_impact_title": "What Does This Mean for My Farm?",

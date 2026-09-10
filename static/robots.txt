@@ -1,0 +1,11 @@
+# KisanSense Robots Configuration
+# Note: In Streamlit Community Cloud, this file is served at /app/static/robots.txt
+# When deployed behind a custom domain reverse proxy (e.g. Cloudflare / Nginx),
+# rewrite rule forwards root /robots.txt to /app/static/robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /_stcore/
+Disallow: /api/
+
+Sitemap: https://kisansense-app-proto.streamlit.app/app/static/sitemap.xml

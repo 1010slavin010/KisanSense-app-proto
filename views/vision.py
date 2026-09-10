@@ -13,6 +13,7 @@ from typing import Any
 import streamlit as st
 from PIL import Image
 
+from components.breadcrumbs import render_breadcrumbs
 from services.farm_service import get_farm_profile, is_profile_configured
 from services.vision_service import VisionAnalysisResult, analyze_plant_image
 from utils.translations import t
@@ -26,8 +27,10 @@ def render() -> None:
     # =========================================================================
     # 1. Header Section
     # =========================================================================
+    render_breadcrumbs(t("vision_header"), "vision")
+
     st.markdown(
-        f'<h1 class="hero-title">🌿 {t("vision_header")}</h1>',
+        f'<h1 class="ks-page-title hero-title">🌿 {t("vision_header")}</h1>',
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -124,7 +127,11 @@ def render() -> None:
         st.markdown('<div class="vision-card">', unsafe_allow_html=True)
         if uploaded_bytes:
             try:
-                st.image(uploaded_bytes, caption="Analyzed Leaf Specimen", use_container_width=True)
+                st.image(
+                    uploaded_bytes,
+                    caption="Crop leaf specimen submitted for plant health screening",
+                    use_container_width=True,
+                )
             except Exception:
                 st.write("📷 [Image loaded]")
         else:

@@ -1219,3 +1219,48 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   outline: 2px solid var(--color-primary) !important;
   outline-offset: 2px !important;
 }
+
+/* --------------------------------------------------------------------------
+   12. SEO & BREADCRUMB UTILITIES
+   -------------------------------------------------------------------------- */
+
+.ks-page-title {
+  color: var(--color-text) !important;
+  font-family: inherit !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.25 !important;
+}
+
+.ks-breadcrumb {
+  margin-bottom: 0.65rem !important;
+  padding: 0 !important;
+  font-size: 0.85rem !important;
+  color: var(--color-text-muted) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+}
+
+.ks-breadcrumb-link {
+  color: var(--color-primary) !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: color 0.15s ease !important;
+}
+
+.ks-breadcrumb-link:hover {
+  text-decoration: underline !important;
+  color: var(--color-primary-dark, var(--color-primary)) !important;
+}
+
+.ks-breadcrumb-separator {
+  color: var(--color-text-muted) !important;
+  opacity: 0.6 !important;
+  user-select: none !important;
+}
+
+.ks-breadcrumb-current {
+  font-weight: 600 !important;
+  color: var(--color-text) !important;
+}

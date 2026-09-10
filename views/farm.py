@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from components.breadcrumbs import render_breadcrumbs
 from services.farm_service import (
     AREA_UNITS,
     COMMON_CROPS,
@@ -107,9 +108,15 @@ def _render_profile_overview(profile: FarmProfile) -> None:
             unsafe_allow_html=True,
         )
 
-    if st.button(f"✏️ {t('farm_edit_button')}", key="btn_edit_profile"):
-        st.session_state.edit_farm_profile = True
-        st.rerun()
+    col_edit, col_wx = st.columns([1, 1.2])
+    with col_edit:
+        if st.button(f"✏️ {t('farm_edit_button')}", key="btn_edit_profile", use_container_width=True):
+            st.session_state.edit_farm_profile = True
+            st.rerun()
+    with col_wx:
+        if st.button("🌤️ Check Farm Weather", key="btn_farm_to_weather", use_container_width=True):
+            st.session_state.page = "weather"
+            st.rerun()
 
 
 def _render_profile_form(profile: FarmProfile, is_first_time: bool) -> None:
@@ -280,10 +287,12 @@ def render() -> None:
     profile = get_farm_profile()
     configured = is_profile_configured(profile)
 
+    render_breadcrumbs(t("farm_title"), "farm")
+
     if "edit_farm_profile" not in st.session_state:
         st.session_state.edit_farm_profile = not configured
 
-    st.markdown(f'<h1 class="hero-title">{t("farm_title")}</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 class="ks-page-title hero-title">{t("farm_title")}</h1>', unsafe_allow_html=True)
     st.markdown(f'<p class="hero-tagline">{t("farm_subtitle")}</p>', unsafe_allow_html=True)
     st.markdown('<div class="section-spacer" style="height: 1rem;"></div>', unsafe_allow_html=True)
 

@@ -16,6 +16,10 @@ from utils.translations import DEFAULT_LANG, SUPPORTED_LANGUAGES, t
 
 def _go_to(page_key: str) -> None:
     st.session_state.page = page_key
+    try:
+        st.query_params["page"] = page_key
+    except Exception:
+        pass
 
 
 def _on_lang_change() -> None:

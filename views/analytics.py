@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 import streamlit as st
 
+from components.breadcrumbs import render_breadcrumbs
 from components.cards import render_metric_card
 from components.status import render_status_dot
 from services.farm_service import get_farm_profile
@@ -53,7 +54,9 @@ def render() -> None:
     reading = get_current_sensor_data(condition=sim_condition)
     history = _record_telemetry_point(reading)
 
-    st.markdown(f'<h1 class="hero-title">📈 {t("analytics_header_title")}</h1>', unsafe_allow_html=True)
+    render_breadcrumbs("Farm Analytics", "analytics")
+
+    st.markdown('<h1 class="ks-page-title hero-title">📈 Farm Analytics</h1>', unsafe_allow_html=True)
     st.markdown(
         f'<p class="hero-tagline">{t("analytics_header_subtitle")} ({crop_title})</p>',
         unsafe_allow_html=True,

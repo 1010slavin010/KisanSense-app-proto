@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from components.breadcrumbs import render_breadcrumbs
 from services.alert_service import generate_farm_alerts
 from services.farm_intelligence import evaluate_farm_intelligence
 from services.farm_service import get_farm_context, get_farm_profile, is_profile_configured
@@ -68,9 +69,11 @@ def render() -> None:
     active_count = len(active_alerts)
 
     # Header with active count
+    render_breadcrumbs("Farm Alerts", "alerts")
+
     st.markdown(
         f'<div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 0.2rem;">'
-        f'<h1 class="hero-title" style="margin-bottom: 0 !important;">ALERTS</h1>'
+        f'<h1 class="ks-page-title hero-title" style="margin-bottom: 0 !important;">Farm Alerts</h1>'
         f'<span class="badge badge-info" style="font-size: 0.85rem;">[{active_count} active]</span>'
         f'</div>',
         unsafe_allow_html=True,
@@ -137,13 +140,23 @@ def render() -> None:
                     )
 
         st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-        st.button(
-            "💬 Ask Assistant About Active Alerts",
-            key="btn_alerts_ask_assistant",
-            on_click=_go_to_assistant,
-            args=("What actions should I take regarding the current farm alerts?",),
-            use_container_width=True,
-        )
+        col_irr, col_dev, col_ast = st.columns(3)
+        with col_irr:
+            if st.button("💧 Check Irrigation", key="btn_alerts_to_irrigation", use_container_width=True):
+                st.session_state.page = "irrigation"
+                st.rerun()
+        with col_dev:
+            if st.button("📡 View Devices", key="btn_alerts_to_devices", use_container_width=True):
+                st.session_state.page = "devices"
+                st.rerun()
+        with col_ast:
+            st.button(
+                "💬 Ask Assistant",
+                key="btn_alerts_ask_assistant",
+                on_click=_go_to_assistant,
+                args=("What actions should I take regarding the current farm alerts?",),
+                use_container_width=True,
+            )
 
     with tab_timeline:
         st.markdown(f'<div class="insights-header" style="margin-top: 0.5rem;">⏱️ Activity & Advisory Event Log</div>', unsafe_allow_html=True)

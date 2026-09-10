@@ -5,9 +5,14 @@ components and services, and gives future phases one place to adjust
 thresholds, branding or navigation.
 """
 
+import os
+
 APP_NAME = "KisanSense"
 APP_TAGLINE = "Smart farming, made simple."
-PAGE_ICON = "🌾"
+PAGE_ICON = "static/favicon.png"
+
+# Production base URL for canonical tags, sitemaps, Open Graph
+KISANSENSE_BASE_URL = os.getenv("KISANSENSE_BASE_URL", "https://kisansense-app-proto.streamlit.app").rstrip("/")
 
 # Soil moisture thresholds (percent).
 SOIL_MOISTURE_LOW = 30

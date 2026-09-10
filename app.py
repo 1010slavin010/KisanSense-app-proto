@@ -9,8 +9,9 @@ import streamlit as st
 from components.navbar import render_navbar
 from services.farm_service import init_farm_profile
 from utils.config import APP_NAME, PAGE_ICON
+from utils.seo import get_page_title, inject_seo_head
 from utils.translations import DEFAULT_LANG
-from views import alerts, analytics, assistance, devices, farm, home, irrigation, vision, weather
+from views import alerts, analytics, assistance, devices, farm, home, irrigation, not_found, vision, weather
 
 PAGES = {
     "home": home,
@@ -391,8 +392,20 @@ def load_css(path: str) -> None:
 
 
 def init_session_state() -> None:
+    # Safely inspect query parameters on initial load
+    try:
+        query_page = st.query_params.get("page")
+    except Exception:
+        query_page = None
+
     if "page" not in st.session_state:
-        st.session_state.page = "home"
+        if query_page and (query_page in PAGES or query_page == "404"):
+            st.session_state.page = query_page
+        elif query_page:
+            st.session_state.page = "404"
+        else:
+            st.session_state.page = "home"
+
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = []
     if "lang" not in st.session_state:
@@ -409,18 +422,33 @@ def init_session_state() -> None:
 
 
 def main() -> None:
+    init_session_state()
+    current_page = st.session_state.get("page", "home")
+
+    # Sync query parameter with current active page
+    try:
+        if st.query_params.get("page") != current_page:
+            st.query_params["page"] = current_page
+    except Exception:
+        pass
+
+    page_title = get_page_title(current_page)
+
     st.set_page_config(
-        page_title=APP_NAME,
+        page_title=page_title,
         page_icon=PAGE_ICON,
         layout="wide",
         initial_sidebar_state="collapsed",
     )
-    init_session_state()
     load_css("assets/style.css")
+    inject_seo_head(current_page)
 
-    render_navbar(current_page=st.session_state.page)
+    render_navbar(current_page=current_page)
 
-    page_module = PAGES.get(st.session_state.page, home)
+    if current_page in PAGES:
+        page_module = PAGES[current_page]
+    else:
+        page_module = not_found
     page_module.render()
 
 

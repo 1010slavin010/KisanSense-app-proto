@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from components.breadcrumbs import render_breadcrumbs
 from components.cards import render_metric_card
 from components.status import render_status_dot
 from services.hardware_client import FAULT_STATUSES
@@ -87,7 +88,9 @@ def render() -> None:
         trouble_guide = "Refresh the page or trigger a test ping to verify telemetry integrity."
 
     # Header
-    st.markdown(f'<h1 class="hero-title">📡 {t("devices_header_title")}</h1>', unsafe_allow_html=True)
+    render_breadcrumbs("Farm Devices", "devices")
+
+    st.markdown('<h1 class="ks-page-title hero-title">📡 Farm Devices</h1>', unsafe_allow_html=True)
     st.markdown(
         f'<p class="hero-tagline">{t("devices_header_subtitle")}</p>',
         unsafe_allow_html=True,
@@ -227,3 +230,8 @@ def render() -> None:
             """,
             unsafe_allow_html=True,
         )
+
+    st.markdown('<div style="height: 0.8rem;"></div>', unsafe_allow_html=True)
+    if st.button("📈 View Telemetry Analytics", key="btn_devices_to_analytics", use_container_width=True):
+        st.session_state.page = "analytics"
+        st.rerun()

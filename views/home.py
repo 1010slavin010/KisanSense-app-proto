@@ -107,10 +107,10 @@ def render() -> None:
     with col_h1:
         st.markdown(
             f'<div style="margin-bottom: 0.15rem;">'
-            f'<span style="font-size: 0.95rem; font-weight: 500; color: var(--color-text-secondary);">'
-            f'Welcome back, <strong>{farmer_display}</strong>'
-            f'</span>'
-            f'<h1 class="hero-title" style="margin-top: 0.1rem; font-size: 1.85rem;">{farm_name_display}</h1>'
+            f'<h1 class="ks-page-title hero-title" style="margin-top: 0.1rem; font-size: 1.85rem;">How is your farm?</h1>'
+            f'<div style="font-size: 0.95rem; font-weight: 500; color: var(--color-text-secondary); margin-top: 0.15rem;">'
+            f'<strong>{farm_name_display}</strong> • Welcome back, {farmer_display}'
+            f'</div>'
             f'<div style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 0.15rem;">'
             f'📍 {location_display}'
             f'{" • 🌾 " + profile.crop if has_profile and profile.crop else ""}'

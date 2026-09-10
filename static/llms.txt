@@ -1,0 +1,22 @@
+# KisanSense — Smart Farming Assistant
+> AI-powered farm monitoring, crop health screening, and autonomous irrigation guidance.
+
+## Overview
+KisanSense is an agricultural technology application designed to help small and medium farm operators monitor environmental telemetry, optimize irrigation scheduling, screen crop leaves for visible health symptoms, and receive actionable, context-aware agricultural guidance.
+
+## Core Capabilities
+- **Farm Profile & Conditions**: Tracks crop type, soil texture, growth stage, root depth, and field acreage to customize thresholds.
+- **Environmental Telemetry**: Collects live or simulated readings for soil moisture (%), ambient temperature (°C), relative humidity (%), and heat index.
+- **Smart Irrigation Advisory**: Recommends irrigation actions (RUN, HOLD, REDUCE) based on soil moisture depletion, weather forecasts, and historical run times.
+- **Crop Health Vision**: Conservative visual screening of leaf imagery for signs of common leaf blights, rusts, nutrient deficiencies, or healthy growth patterns.
+- **Multilingual Assistant**: Agricultural guidance provided in English, Hindi (हिंदी), Tamil (தமிழ்), and Kannada (ಕನ್ನಡ).
+- **Farm Alerts & Diagnostics**: Multi-tier alert dispatch (Good, Info, Warning, Critical) with fail-safe thresholds and device health monitoring.
+
+## System Limitations
+- **Screening Tool Only**: KisanSense provides assistive guidance and conservative visual screening; it is not an official laboratory diagnostic service or substitute for accredited agronomist site inspection.
+- **Offline & Connectivity**: Telemetry ingestion requires active network connectivity or local ESP32 hardware bridge.
+- **Safety Latches**: Automatic irrigation commands enforce maximum duration and rate limits to prevent overwatering.
+
+## Canonical Resources
+- Web Application: https://kisansense-app-proto.streamlit.app/
+- Static Sitemap: https://kisansense-app-proto.streamlit.app/app/static/sitemap.xml

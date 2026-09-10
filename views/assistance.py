@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from components.breadcrumbs import render_breadcrumbs
 from components.chatbot import render_chatbot
 from services.ai_service import get_ai_response
 from services.farm_service import get_farm_context, get_farm_profile, is_profile_configured
@@ -20,12 +21,14 @@ def render() -> None:
     farm_ctx = get_farm_context()
     has_profile = is_profile_configured(profile)
 
+    render_breadcrumbs("KisanSense Assistant", "assistant")
+
     reading = st.session_state.get("sensor_reading")
     if reading is None:
         reading = get_current_sensor_data(farm_context=farm_ctx)
         st.session_state.sensor_reading = reading
 
-    st.markdown('<h1 class="hero-title">💬 KisanSense Assistant</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="ks-page-title hero-title">💬 KisanSense Assistant</h1>', unsafe_allow_html=True)
     st.markdown(
         '<p class="hero-tagline">AI-powered agronomic advisory grounded in your live farm telemetry, soil conditions, and crop profile.</p>',
         unsafe_allow_html=True,

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from components.breadcrumbs import render_breadcrumbs
 from services.farm_intelligence import evaluate_farm_intelligence
 from services.farm_service import get_farm_profile, is_profile_configured
 from services.sensor_service import get_current_sensor_data
@@ -56,8 +57,10 @@ def render() -> None:
     # ---------------------------------------------------------
     # 2. Header & Location Context
     # ---------------------------------------------------------
+    render_breadcrumbs(t("weather_page_title"), "weather")
+
     st.markdown(
-        f'<h1 class="hero-title">🌤️ {t("weather_page_title")}</h1>',
+        f'<h1 class="ks-page-title hero-title">🌤️ {t("weather_page_title")}</h1>',
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -280,13 +283,19 @@ def render() -> None:
     st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
 
     # ---------------------------------------------------------
-    # 8. Ask Assistant CTA
+    # 8. Contextual Actions & Ask Assistant CTA
     # ---------------------------------------------------------
     assistant_prompt = f"How will today's weather ({weather.condition}, {weather.temperature_c:.0f}°C, {weather.rain_probability}% rain) affect my {crop_name} and irrigation?"
-    st.button(
-        f"💬 {t('weather_ask_assistant_btn')}",
-        key="btn_weather_ask_assistant",
-        on_click=_go_to_assistant,
-        args=(assistant_prompt,),
-        use_container_width=True,
-    )
+    col_irr, col_ast = st.columns(2)
+    with col_irr:
+        if st.button("💧 View Irrigation Guidance", key="btn_weather_to_irrigation", use_container_width=True):
+            st.session_state.page = "irrigation"
+            st.rerun()
+    with col_ast:
+        st.button(
+            f"💬 {t('weather_ask_assistant_btn')}",
+            key="btn_weather_ask_assistant",
+            on_click=_go_to_assistant,
+            args=(assistant_prompt,),
+            use_container_width=True,
+        )

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import streamlit as st
 
+from components.breadcrumbs import render_breadcrumbs
 from components.cards import render_metric_card
 from components.status import render_status_dot
 from services.farm_service import get_farm_context, get_farm_profile, is_profile_configured
@@ -58,7 +59,9 @@ def render() -> None:
     # =========================================================================
     # Header & Farm Context
     # =========================================================================
-    st.markdown(f'<h1 class="hero-title">💧 {t("nav_irrigation")}</h1>', unsafe_allow_html=True)
+    render_breadcrumbs("Smart Irrigation", "irrigation")
+
+    st.markdown('<h1 class="ks-page-title hero-title">💧 Smart Irrigation</h1>', unsafe_allow_html=True)
     st.markdown(
         f'<p class="hero-tagline">Telemetry-grounded irrigation decisions and water stewardship for {crop_title}.</p>',
         unsafe_allow_html=True,
