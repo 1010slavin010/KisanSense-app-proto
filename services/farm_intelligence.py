@@ -400,6 +400,7 @@ def evaluate_farm_intelligence(
     reading: SensorReading,
     farm_context: dict[str, Any] | None = None,
     vision_result: Any | None = None,
+    weather_context: Any | None = None,
 ) -> FarmIntelligenceResult:
     """Evaluate farm conditions and generate an explainable intelligence assessment.
 
@@ -407,6 +408,7 @@ def evaluate_farm_intelligence(
         reading: Current SensorReading contract (from Simulator or Hardware).
         farm_context: Optional farm profile dict from services.farm_service.
         vision_result: Optional VisionAnalysisResult contract from services.vision_service.
+        weather_context: Optional WeatherSnapshot or dict from services.weather_service.
 
     Returns:
         Structured FarmIntelligenceResult.
@@ -425,6 +427,7 @@ def evaluate_farm_intelligence(
         farm_context=ctx,
         is_online=reading.is_online,
         raw_status=getattr(reading, "raw_status", "ok"),
+        weather_context=weather_context,
     )
 
     # If telemetry is unsafe, offline, or invalid, FAIL SAFE IMMEDIATELY

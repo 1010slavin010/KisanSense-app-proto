@@ -96,6 +96,12 @@ class TelemetryRequestHandler(BaseHTTPRequestHandler):
 
         try:
             content_length = int(content_length_header)
+            if content_length > 64 * 1024:
+                self._send_json_response(413, {
+                    "error": "Payload Too Large",
+                    "detail": "Telemetry payload exceeds maximum allowed size of 64KB.",
+                })
+                return
             raw_body = self.rfile.read(content_length).decode("utf-8")
         except Exception as exc:
             self._send_json_response(400, {

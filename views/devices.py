@@ -84,9 +84,9 @@ def render() -> None:
         trouble_guide = "Please refresh the page or trigger a test ping to verify telemetry integrity."
 
     # Header
-    st.markdown(f'<h1 class="hero-title">📡 Device Diagnostics</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 class="hero-title">📡 {t("devices_header_title")}</h1>', unsafe_allow_html=True)
     st.markdown(
-        f'<p class="hero-tagline">Hardware telemetry, sensor link health, battery levels, and field troubleshooting.</p>',
+        f'<p class="hero-tagline">{t("devices_header_subtitle")}</p>',
         unsafe_allow_html=True,
     )
 
@@ -103,7 +103,7 @@ def render() -> None:
         st.markdown(
             f'<div class="status-dot-row" style="justify-content: flex-end;">'
             f'<span class="status-dot" style="background-color: {health_color};"></span>'
-            f'<span class="status-dot-label">Node Status: <strong>{health_cat}</strong> ({source_label})</span>'
+            f'<span class="status-dot-label">{t("devices_node_status")}: <strong>{health_cat}</strong> ({source_label})</span>'
             f'</div>',
             unsafe_allow_html=True,
         )
@@ -131,14 +131,14 @@ def render() -> None:
     st.markdown('<div style="height: 1rem;"></div>', unsafe_allow_html=True)
 
     # Metric Cards Row
-    st.markdown(f'<div class="insights-header">⚡ Telemetry & Radio Diagnostics</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="insights-header">⚡ {t("devices_telemetry_diagnostics")}</div>', unsafe_allow_html=True)
     d1, d2, d3, d4 = st.columns(4)
 
     with d1:
         batt_val = f"{batt:.2f} V" if batt is not None else "3.85 V"
         batt_sev = "good" if (batt is None or batt >= 3.6) else ("warning" if batt >= 3.4 else "alert")
         render_metric_card(
-            title="🔋 Battery Voltage",
+            title=f"🔋 {t('devices_battery_voltage')}",
             value=batt_val,
             status_type=batt_sev,
             status_label="Healthy" if batt_sev == "good" else "Recharge Soon",
@@ -152,7 +152,7 @@ def render() -> None:
         rssi_sev = "good" if rssi_int >= -75 else ("warning" if rssi_int >= -85 else "alert")
         rssi_label = "Strong" if rssi_sev == "good" else ("Moderate" if rssi_sev == "warning" else "Weak")
         render_metric_card(
-            title="📶 Wi-Fi RSSI",
+            title=f"📶 {t('devices_wifi_rssi')}",
             value=rssi_val,
             status_type=rssi_sev,
             status_label=rssi_label,
@@ -162,7 +162,7 @@ def render() -> None:
     with d3:
         p_status = "good" if reading.is_online and raw_status not in FAULT_STATUSES else "alert"
         render_metric_card(
-            title="🌱 Probe Integrity",
+            title=f"🌱 {t('devices_probe_integrity')}",
             value=raw_status.upper(),
             status_type=p_status,
             status_label="Pass" if p_status == "good" else "Fault",
@@ -172,7 +172,7 @@ def render() -> None:
     with d4:
         age_label = "< 1 min ago" if reading.is_online else "Stale"
         render_metric_card(
-            title="⏱️ Data Freshness",
+            title=f"⏱️ {t('devices_data_freshness')}",
             value=age_label,
             status_type="good" if reading.is_online else "warning",
             status_label="Current" if reading.is_online else "Delayed",

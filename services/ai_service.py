@@ -889,12 +889,20 @@ def get_ai_response(message: str, context: dict[str, Any] | None = None) -> str:
             except Exception:
                 weather_obj = None
 
-        wind_spd = getattr(weather_obj, "wind_speed_kmh", 12.0) if weather_obj else 12.0
-        rain_prob = getattr(weather_obj, "rain_probability", 20) if weather_obj else 20
-        rain_mm = getattr(weather_obj, "precipitation_mm", 0.0) if weather_obj else 0.0
-        cond = getattr(weather_obj, "condition", "Partly Cloudy") if weather_obj else "Partly Cloudy"
-        temp = getattr(weather_obj, "temperature_c", 28.0) if weather_obj else 28.0
-        hum = getattr(weather_obj, "humidity", 60.0) if weather_obj else 60.0
+        if weather_obj is None or not getattr(weather_obj, "is_available", True):
+            loc_disp = f" for **{location}**" if location else ""
+            return (
+                f"🌤️ Weather forecast information is currently unavailable{loc_disp}. "
+                "Unable to retrieve current rain probability or microclimate conditions. "
+                "Please verify your location in the Farm tab."
+            )
+
+        wind_spd = getattr(weather_obj, "wind_speed_kmh", 0.0)
+        rain_prob = getattr(weather_obj, "rain_probability", 0)
+        rain_mm = getattr(weather_obj, "precipitation_mm", 0.0)
+        cond = getattr(weather_obj, "condition", "Partly Cloudy")
+        temp = getattr(weather_obj, "temperature_c", 25.0)
+        hum = getattr(weather_obj, "humidity", 50.0)
         loc_str = f" for **{weather_obj.location}**" if weather_obj and weather_obj.location else ""
 
         # Spraying & field operations

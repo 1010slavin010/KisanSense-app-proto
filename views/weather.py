@@ -42,7 +42,11 @@ def render() -> None:
     st.session_state.latest_weather_snapshot = weather
 
     # Farm Intelligence & Vision Context
-    intel = evaluate_farm_intelligence(reading, farm_context=farm_ctx if has_profile else None)
+    intel = evaluate_farm_intelligence(
+        reading,
+        farm_context=farm_ctx if has_profile else None,
+        weather_context=weather,
+    )
     vision_result = st.session_state.get("latest_vision_result", None)
 
     # Unified Weather Farm Insight

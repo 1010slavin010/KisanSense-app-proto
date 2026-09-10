@@ -285,6 +285,14 @@ def generate_farm_alerts(
             )
         )
 
+    # Deduplicate alerts by id preserving order
+    seen_ids: set[str] = set()
+    deduped_alerts: list[FarmAlert] = []
+    for a in alerts:
+        if a.id not in seen_ids:
+            seen_ids.add(a.id)
+            deduped_alerts.append(a)
+
     # Deterministic sort: Severity descending, then source
-    alerts.sort(key=lambda a: a.severity_weight, reverse=True)
-    return alerts
+    deduped_alerts.sort(key=lambda a: a.severity_weight, reverse=True)
+    return deduped_alerts

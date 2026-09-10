@@ -65,6 +65,12 @@ def _validate_image_quality(img: Image.Image) -> tuple[bool, str, list[str]]:
         )
         return False, "low_resolution", details
 
+    if width > MAX_IMAGE_DIMENSION or height > MAX_IMAGE_DIMENSION:
+        details.append(
+            f"Image dimensions ({width}x{height}px) exceed the maximum supported resolution of {MAX_IMAGE_DIMENSION}px."
+        )
+        return False, "oversized_dimension", details
+
     # Resize large images to a standard evaluation size for consistency and memory safety
     eval_img = img.convert("RGB")
     if width > 512 or height > 512:

@@ -177,7 +177,12 @@ def render() -> None:
         weather_context=weather_snap,
     )
     latest_vision = st.session_state.get("latest_vision_result")
-    intel = evaluate_farm_intelligence(reading, farm_context=farm_ctx, vision_result=latest_vision)
+    intel = evaluate_farm_intelligence(
+        reading,
+        farm_context=farm_ctx,
+        vision_result=latest_vision,
+        weather_context=weather_snap,
+    )
 
     # Important Alerts Banner (prominently surfaces active alert if one exists)
     if not reading.is_online:
@@ -534,36 +539,36 @@ def render() -> None:
     # =========================================================================
     # E2. QUICK ACTIONS (Scan Crop, Check Irrigation, View Alerts, Devices, Analytics)
     # =========================================================================
-    st.markdown('<div class="insights-header">⚡ Quick Farm Actions</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="insights-header">⚡ {t("qa_title")}</div>', unsafe_allow_html=True)
     qa1, qa2, qa3, qa4, qa5, qa6 = st.columns(6)
 
     with qa1:
-        if st.button("📷 Scan Crop", key="btn_qa_scan", use_container_width=True):
+        if st.button(f"📷 {t('qa_scan')}", key="btn_qa_scan", use_container_width=True):
             st.session_state.page = "vision"
             st.rerun()
 
     with qa2:
-        if st.button("💧 Irrigation", key="btn_qa_irrigation", use_container_width=True):
+        if st.button(f"💧 {t('qa_irrigation')}", key="btn_qa_irrigation", use_container_width=True):
             st.session_state.page = "irrigation"
             st.rerun()
 
     with qa3:
-        if st.button("🔔 View Alerts", key="btn_qa_alerts", use_container_width=True):
+        if st.button(f"🔔 {t('qa_alerts')}", key="btn_qa_alerts", use_container_width=True):
             st.session_state.page = "alerts"
             st.rerun()
 
     with qa4:
-        if st.button("📡 Devices", key="btn_qa_devices", use_container_width=True):
+        if st.button(f"📡 {t('qa_devices')}", key="btn_qa_devices", use_container_width=True):
             st.session_state.page = "devices"
             st.rerun()
 
     with qa5:
-        if st.button("📈 Analytics", key="btn_qa_analytics", use_container_width=True):
+        if st.button(f"📈 {t('qa_analytics')}", key="btn_qa_analytics", use_container_width=True):
             st.session_state.page = "analytics"
             st.rerun()
 
     with qa6:
-        if st.button("💬 Assistant", key="btn_qa_assistant", use_container_width=True):
+        if st.button(f"💬 {t('qa_assistant')}", key="btn_qa_assistant", use_container_width=True):
             st.session_state.page = "assistant"
             st.rerun()
 
@@ -604,6 +609,7 @@ def render() -> None:
                     "last_updated": reading.last_updated,
                     "intelligence": intel,
                     "vision_result": latest_vision,
+                    "weather": weather_snap,
                 }
                 reply = get_ai_response(query, context=ctx)
                 st.session_state.chat_messages.append({"role": "assistant", "content": reply})

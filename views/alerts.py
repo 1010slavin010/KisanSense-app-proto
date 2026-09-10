@@ -48,6 +48,7 @@ def render() -> None:
         reading,
         farm_context=farm_ctx if has_profile else None,
         vision_result=vision_result,
+        weather_context=weather,
     )
     irrigation = get_irrigation_status(
         reading.soil_moisture,
