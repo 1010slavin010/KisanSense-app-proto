@@ -1,6 +1,6 @@
-streamlit>=1.30
-pillow>=9.0
-numpy>=1.20
-keras>=3.0
-h5py>=3.8
-tensorflow-cpu>=2.16; python_version < "3.13"
+streamlit>=1.30,<2.0
+pillow>=9.0,<11.0
+numpy>=1.24,<2.0
+keras>=3.0,<4.0
+h5py>=3.8,<4.0
+tensorflow-cpu>=2.16,<2.18; python_version < "3.13"
