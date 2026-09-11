@@ -490,3 +490,7 @@ def analyze_plant_image(
         affected_foliage_ratio=aff_ratio,
         treatment_urgency=urgency,
     )
+
+
+# Backward-compatibility alias preserving the analyze_image contract
+analyze_image = analyze_plant_image

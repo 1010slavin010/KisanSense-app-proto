@@ -146,7 +146,9 @@ def render() -> None:
                 "Time": [p["time"] for p in history],
                 "Soil Moisture (%)": [p["soil_moisture"] for p in history],
             }
-            st.line_chart(chart_data, x="Time", y="Soil Moisture (%)", color="#1F5C52")
+            is_dark = st.session_state.get("theme", "light") == "dark"
+            sm_color = "#34D399" if is_dark else "#059669"
+            st.line_chart(chart_data, x="Time", y="Soil Moisture (%)", color=sm_color)
 
         with col_ch2:
             st.markdown(
@@ -163,7 +165,9 @@ def render() -> None:
                 "Temperature (°C)": [p["temperature"] for p in history],
                 "Humidity (%)": [p["humidity"] for p in history],
             }
-            st.line_chart(chart_data_climate, x="Time", y=["Temperature (°C)", "Humidity (%)"], color=["#C58A1A", "#3B6EA8"])
+            temp_color = "#FBBF24" if is_dark else "#D97706"
+            hum_color = "#60A5FA" if is_dark else "#2563EB"
+            st.line_chart(chart_data_climate, x="Time", y=["Temperature (°C)", "Humidity (%)"], color=[temp_color, hum_color])
     else:
         st.info("Not enough telemetry data yet. As sensor readings are recorded over time, trends will plot automatically.")
 

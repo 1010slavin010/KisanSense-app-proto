@@ -1,13 +1,19 @@
-"""Farm Profile view for KisanSense.
+"""Camera / Crop Scan view for KisanSense.
 
-Enables farmers to view, configure, and update their farm profile (farmer name,
-farm name, crop, growth stage, soil type, area, irrigation method, and location).
-Organized cleanly into Farmer Information, Crop Information, and Farm Details.
-All state persists in st.session_state.farm_profile across reruns and navigation.
+Provides an intuitive, mobile-first plant and leaf scanning interface.
+Enables farmers to:
+1. Upload a picture of a plant or leaf from their device (JPG, JPEG, PNG, WEBP).
+2. Take a photo using their device built-in camera/webcam.
+3. Preview the captured/uploaded image and confirm readiness.
+4. Run foliar vision analysis via the existing offline deterministic vision engine.
+5. Display a clear, farmer-friendly result card with conservative recommendations.
+6. Retain operational farm profile data and settings in a collapsible expander.
 """
 
 from __future__ import annotations
 
+import io
+from typing import Any
 import streamlit as st
 
 from components.breadcrumbs import render_breadcrumbs
@@ -18,16 +24,175 @@ from services.farm_service import (
     IRRIGATION_METHODS,
     SOIL_TYPES,
     FarmProfile,
+    get_farm_context,
     get_farm_profile,
     is_profile_configured,
     save_farm_profile,
     validate_farm_profile,
 )
+from services.vision_service import VisionAnalysisResult, analyze_plant_image
 from utils.translations import t
 
 
+def _go_to_assistant() -> None:
+    st.session_state.page = "assistant"
+
+
+def _render_guidance_tips() -> None:
+    """Render a compact, farmer-friendly photo quality guidance section."""
+    st.markdown(
+        f"""
+        <div class="insight-card" style="margin-bottom: 1.25rem;">
+            <div style="font-weight: 700; font-size: 0.92rem; color: var(--color-primary); margin-bottom: 0.45rem; display: flex; align-items: center; gap: 6px;">
+                💡 {t('camera_scan_tips_title')}
+            </div>
+            <div style="font-size: 0.88rem; color: var(--color-text-secondary); line-height: 1.55;">
+                • {t('camera_scan_tip_daylight')}<br/>
+                • {t('camera_scan_tip_focus')}<br/>
+                • {t('camera_scan_tip_area')}<br/>
+                • {t('camera_scan_tip_shadows')}<br/>
+                • {t('camera_scan_tip_sides')}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_result_card(result: VisionAnalysisResult, image_bytes: bytes | None) -> None:
+    """Render a clean, conservative, farmer-friendly diagnostic result card."""
+    col_img, col_diag = st.columns([1, 1.35])
+
+    with col_img:
+        st.markdown('<div class="vision-card">', unsafe_allow_html=True)
+        if image_bytes:
+            try:
+                st.image(
+                    image_bytes,
+                    caption="Scanned crop leaf specimen",
+                    use_container_width=True,
+                )
+            except Exception:
+                st.write("📷 [Image Preview]")
+        else:
+            st.write("📷 *Recent scan from this session*")
+
+        quality_label = "Good" if result.image_quality == "good" else "Poor / Unclear"
+        quality_color = "var(--color-good)" if result.image_quality == "good" else "var(--color-alert)"
+        st.markdown(
+            f'<div style="margin-top: 0.6rem; font-size: 0.85rem; color: var(--color-text-secondary);">'
+            f'IMAGE QUALITY: <strong style="color: {quality_color};">{quality_label}</strong>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col_diag:
+        # Case A: Quality Gate Failed / Low Quality
+        if not result.success or result.image_quality != "good":
+            st.markdown(
+                f"""
+                <div class="vision-card vision-result-rejected">
+                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--color-alert); margin-bottom: 0.4rem;">
+                        📷 {t('vision_quality_reject_title')}
+                    </div>
+                    <p style="color: var(--color-text); margin-bottom: 0.65rem; font-size: 0.92rem;">
+                        {result.explanation}
+                    </p>
+                    <div class="vision-section-box">
+                        <strong style="color: var(--color-primary); font-size: 0.85rem;">💡 {t('camera_scan_action')}:</strong>
+                        <p style="margin: 0.25rem 0 0 0; color: var(--color-text); font-size: 0.9rem;">
+                            {t('camera_scan_uncertain')} {result.recommended_action}
+                        </p>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            return
+
+        # Case B: Successful Diagnostic
+        conf_pct = int(round(result.confidence * 100))
+        if result.confidence_level == "high":
+            conf_badge = f'<span class="vision-badge-high">● High Confidence ({conf_pct}%)</span>'
+        elif result.confidence_level == "moderate":
+            conf_badge = f'<span class="vision-badge-moderate">● Moderate Confidence ({conf_pct}%)</span>'
+        else:
+            conf_badge = f'<span class="vision-badge-low">● Low Confidence ({conf_pct}%)</span>'
+
+        if result.healthy:
+            card_class = "vision-result-healthy"
+            status_text = "Healthy"
+            headline_color = "var(--color-good)"
+        else:
+            card_class = "vision-result-warning"
+            category_clean = result.category.replace("_", " ").title()
+            status_text = f"Possible {category_clean}"
+            headline_color = "var(--color-warning)"
+
+        symptoms_list = getattr(result, "symptoms_detected", [])
+        symptoms_str = (
+            ", ".join(s.replace("_", " ").title() for s in symptoms_list)
+            if symptoms_list
+            else t("vision_no_symptoms")
+        )
+
+        st.markdown(
+            f"""
+            <div class="vision-card {card_class}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
+                    <span style="font-size: 0.85rem; font-weight: 700; color: {headline_color}; text-transform: uppercase; letter-spacing: 0.04em;">
+                        ● {t('camera_scan_result_title')} — {status_text}
+                    </span>
+                    {conf_badge}
+                </div>
+                <div style="font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.35rem;">
+                    {result.diagnosis}
+                </div>
+                <div style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0.75rem;">
+                    🌾 <strong>{result.crop}</strong> • Category: <strong>{result.category.replace('_', ' ').title()}</strong>
+                </div>
+                <div class="vision-section-box">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">
+                        🔬 {t('camera_scan_observed')}
+                    </div>
+                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text-secondary); font-size: 0.88rem;">
+                        {symptoms_str}
+                    </p>
+                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
+                        {result.explanation}
+                    </p>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.03em;">
+                        🌱 {t('camera_scan_action')}
+                    </div>
+                    <p style="margin: 0.2rem 0 0 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
+                        {result.recommended_action}
+                    </p>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.button(
+            f"💬 {t('camera_scan_ask_assistant')}",
+            key="btn_ask_camera_assistant",
+            on_click=_go_to_assistant,
+            use_container_width=True,
+        )
+
+    st.markdown(
+        """
+        <div class="vision-disclaimer">
+            <strong>⚠️ AI Screening Notice:</strong> This assessment is an automated computer vision screening tool intended for early field detection and agronomic advisory. It is not a definitive laboratory diagnostic. Confirm severe symptoms with local agricultural extension officers before taking major chemical interventions.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _render_profile_overview(profile: FarmProfile) -> None:
-    """Render a clean enterprise summary card of the active farm profile."""
+    """Render a clean summary card of the active farm profile."""
     farmer_str = profile.farmer_name or "Not set"
     farm_str = profile.farm_name or "My Farm"
     loc_str = profile.location or "Location not set"
@@ -287,16 +452,140 @@ def render() -> None:
     profile = get_farm_profile()
     configured = is_profile_configured(profile)
 
-    render_breadcrumbs(t("farm_title"), "farm")
+    render_breadcrumbs(t("camera_scan_title"), "farm")
 
+    # =========================================================================
+    # 1. Header & Page Tagline (One clear H1)
+    # =========================================================================
+    st.markdown(
+        f'<h1 class="ks-page-title hero-title">📷 {t("camera_scan_title")}</h1>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f'<p class="hero-tagline">{t("camera_scan_subtitle")}</p>',
+        unsafe_allow_html=True,
+    )
+
+    # Active Crop Context Badge
+    if configured and profile.crop:
+        crop_badge = (
+            f'<div class="vision-context-banner">'
+            f'🌾 {t("vision_current_crop")}: <strong>{profile.crop}</strong>'
+            f'</div>'
+        )
+    else:
+        crop_badge = (
+            f'<div class="vision-context-banner" style="opacity: 0.85;">'
+            f'🌾 {t("vision_generic_crop")}'
+            f'</div>'
+        )
+    st.markdown(crop_badge, unsafe_allow_html=True)
+
+    # =========================================================================
+    # 2. Photo Quality Guidance
+    # =========================================================================
+    _render_guidance_tips()
+
+    # =========================================================================
+    # 3. Dual Input Methods: Upload or Camera
+    # =========================================================================
+    tab_upload, tab_camera = st.tabs(
+        [f"📁 {t('camera_scan_upload_tab')}", f"📷 {t('camera_scan_camera_tab')}"]
+    )
+
+    uploaded_file = None
+    with tab_upload:
+        uploaded_file = st.file_uploader(
+            t("camera_scan_upload_label"),
+            type=["jpg", "jpeg", "png", "webp"],
+            help=t("camera_scan_upload_help"),
+            key="camera_scan_uploader",
+        )
+
+    camera_file = None
+    with tab_camera:
+        camera_file = st.camera_input(
+            t("camera_scan_camera_label"),
+            help=t("camera_scan_camera_help"),
+            key="camera_scan_camera",
+        )
+
+    active_file = uploaded_file or camera_file
+    active_bytes: bytes | None = None
+
+    if active_file is not None:
+        try:
+            active_bytes = active_file.getvalue()
+            # If the user changed or uploaded a new image, update active image
+            if st.session_state.get("farm_scan_active_bytes") != active_bytes:
+                st.session_state.farm_scan_active_bytes = active_bytes
+                # Clear previous result on fresh image input
+                st.session_state.camera_scan_result = None
+        except Exception:
+            active_bytes = None
+    elif st.session_state.get("farm_scan_active_bytes") is not None:
+        active_bytes = st.session_state.farm_scan_active_bytes
+
+    # =========================================================================
+    # 4. Preview & Analyze CTA Flow
+    # =========================================================================
+    if active_bytes:
+        st.success(f"✅ {t('camera_scan_ready')}")
+        
+        # Display image preview with reasonable width
+        col_prev1, col_prev2, col_prev3 = st.columns([1, 2, 1])
+        with col_prev2:
+            try:
+                st.image(
+                    active_bytes,
+                    caption="Image ready for crop health analysis",
+                    use_container_width=True,
+                )
+            except Exception:
+                st.write("📷 [Image loaded]")
+
+        # Main CTA: Analyze Crop (explicit button press prevents unneeded processing)
+        if st.button(
+            f"🔍 {t('camera_scan_analyze_btn')}",
+            key="btn_analyze_crop",
+            type="primary",
+            use_container_width=True,
+        ):
+            try:
+                farm_ctx = get_farm_context()
+                with st.spinner("Analyzing crop leaf symptoms..."):
+                    result = analyze_plant_image(active_bytes, farm_context=farm_ctx)
+                st.session_state.latest_vision_result = result
+                st.session_state.camera_scan_result = result
+            except Exception as exc:
+                st.error(f"{t('camera_scan_error')}: {exc}")
+    else:
+        st.info(f"📷 {t('camera_scan_no_image')}")
+
+    # =========================================================================
+    # 5. Crop Health Result Card
+    # =========================================================================
+    current_result: VisionAnalysisResult | None = st.session_state.get("camera_scan_result")
+    if current_result is None and st.session_state.get("latest_vision_result") is not None:
+        # Fall back to latest vision result if set earlier
+        current_result = st.session_state.latest_vision_result
+
+    if current_result is not None:
+        st.markdown('<div class="section-spacer" style="height: 0.5rem;"></div>', unsafe_allow_html=True)
+        _render_result_card(current_result, active_bytes)
+
+    # =========================================================================
+    # 6. Farm Profile Settings & Operational Context (Preserved in Expander)
+    # =========================================================================
+    st.markdown('<div class="section-spacer" style="height: 1.5rem;"></div>', unsafe_allow_html=True)
     if "edit_farm_profile" not in st.session_state:
         st.session_state.edit_farm_profile = not configured
 
-    st.markdown(f'<h1 class="ks-page-title hero-title">{t("farm_title")}</h1>', unsafe_allow_html=True)
-    st.markdown(f'<p class="hero-tagline">{t("farm_subtitle")}</p>', unsafe_allow_html=True)
-    st.markdown('<div class="section-spacer" style="height: 1rem;"></div>', unsafe_allow_html=True)
-
-    if configured and not st.session_state.edit_farm_profile:
-        _render_profile_overview(profile)
-    else:
-        _render_profile_form(profile, is_first_time=(not configured))
+    with st.expander(
+        f"🌾 {t('camera_scan_profile_expander')}",
+        expanded=st.session_state.get("edit_farm_profile", False),
+    ):
+        if configured and not st.session_state.get("edit_farm_profile", False):
+            _render_profile_overview(profile)
+        else:
+            _render_profile_form(profile, is_first_time=(not configured))

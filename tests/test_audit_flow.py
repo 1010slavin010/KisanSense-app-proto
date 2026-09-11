@@ -26,7 +26,7 @@ class TestFullAppQualityFlow(unittest.TestCase):
         """Verify each page renders with exactly one H1 and proper title."""
         pages = [
             ("home", "How is your farm?"),
-            ("farm", "Farm Profile"),
+            ("farm", "Camera / Crop Scan"),
             ("weather", "Farm Weather"),
             ("irrigation", "Smart Irrigation"),
             ("vision", "Crop Health"),

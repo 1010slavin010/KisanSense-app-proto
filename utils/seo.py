@@ -21,11 +21,11 @@ PAGE_METADATA: dict[str, dict[str, str]] = {
         "path": "/",
     },
     "farm": {
-        "title": "KisanSense — Farm Profile",
-        "h1": "Farm Profile",
+        "title": "KisanSense — Camera / Crop Scan",
+        "h1": "Camera / Crop Scan",
         "description": (
-            "Manage your KisanSense farm profile, crop details, soil type, "
-            "irrigation method and growing conditions."
+            "Upload a plant or leaf photo or use your camera to scan crop "
+            "health and detect visible plant stress."
         ),
         "path": "/?page=farm",
     },

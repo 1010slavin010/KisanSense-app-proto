@@ -39,352 +39,440 @@ def load_css(path: str) -> None:
         dark_css = """
         <style>
         :root, body, .stApp {
-          --color-bg: #0B1412 !important;
-          --color-surface: #132522 !important;
-          --color-surface-alt: #162A27 !important;
-          --color-border: #23433D !important;
-          --color-text: #F2F7F5 !important;
-          --color-text-muted: #A9BFBA !important;
+          --color-bg: #0F1916 !important;
+          --color-surface: #162723 !important;
+          --color-surface-alt: #1E352F !important;
+          --color-surface-muted: #25413A !important;
+          --color-surface-elevated: #28473F !important;
 
-          --color-primary: #1F8F70 !important;
-          --color-primary-soft: #1A302C !important;
-          --color-accent: #25C997 !important;
+          --color-border: #2D4E45 !important;
+          --color-border-subtle: #223C35 !important;
+          --color-border-focus: #34D399 !important;
 
-          --color-good: #25C997 !important;
-          --color-good-soft: #18312C !important;
-          --color-warning: #E5A43B !important;
-          --color-warning-soft: #382A14 !important;
-          --color-alert: #E5684A !important;
-          --color-alert-soft: #3D1F17 !important;
+          --color-text: #F8FAFC !important;
+          --color-text-secondary: #CBD5E1 !important;
+          --color-text-muted: #94A3B8 !important;
+
+          --color-primary: #10B981 !important;
+          --color-primary-dark: #059669 !important;
+          --color-primary-soft: #1E3E35 !important;
+          --color-primary-border: #34D399 !important;
+          --color-accent: #34D399 !important;
+
+          --color-good: #34D399 !important;
+          --color-good-soft: #133328 !important;
+          --color-good-border: #059669 !important;
+
+          --color-warning: #FBBF24 !important;
+          --color-warning-soft: #382408 !important;
+          --color-warning-border: #D97706 !important;
+
+          --color-alert: #F87171 !important;
+          --color-alert-soft: #3B1414 !important;
+          --color-alert-border: #DC2626 !important;
+
+          --color-info: #60A5FA !important;
+          --color-info-soft: #10243E !important;
+          --color-info-border: #2563EB !important;
+
+          --ks-bg: var(--color-bg) !important;
+          --ks-surface: var(--color-surface) !important;
+          --ks-surface-alt: var(--color-surface-alt) !important;
+          --ks-surface-elevated: var(--color-surface-elevated) !important;
+          --ks-border: var(--color-border) !important;
+          --ks-border-subtle: var(--color-border-subtle) !important;
+          --ks-border-focus: var(--color-border-focus) !important;
+          --ks-text-primary: var(--color-text) !important;
+          --ks-text-secondary: var(--color-text-secondary) !important;
+          --ks-text-muted: var(--color-text-muted) !important;
+          --ks-primary: var(--color-primary) !important;
+          --ks-accent: var(--color-accent) !important;
+          --ks-success: var(--color-good) !important;
+          --ks-warning: var(--color-warning) !important;
+          --ks-danger: var(--color-alert) !important;
+          --ks-info: var(--color-info) !important;
 
           --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4), 0 12px 24px rgba(0, 0, 0, 0.5) !important;
-          background-color: #0B1412 !important;
-          color: #F2F7F5 !important;
+          background-color: #0F1916 !important;
+          color: #F8FAFC !important;
         }
 
         .stApp {
-          background-color: #0B1412 !important;
-          color: #F2F7F5 !important;
+          background-color: #0F1916 !important;
+          color: #F8FAFC !important;
         }
 
-        /* Streamlit native widget styling in dark mode */
+        /* --------------------------------------------------------------------------
+           Streamlit Native Component Dark Mode Overrides
+           -------------------------------------------------------------------------- */
         [data-baseweb="input"], [data-baseweb="base-input"] {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
-          color: #F2F7F5 !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         [data-baseweb="input"] input, [data-baseweb="base-input"] input, textarea {
-          color: #F2F7F5 !important;
+          color: #F8FAFC !important;
           background-color: transparent !important;
         }
+        [data-baseweb="input"]:focus-within, [data-baseweb="base-input"]:focus-within {
+          border-color: #34D399 !important;
+        }
+        [data-testid="stWidgetLabel"] label,
+        [data-testid="stWidgetLabel"] p {
+          color: #F8FAFC !important;
+          font-weight: 600 !important;
+        }
         [data-baseweb="select"] > div {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
-          color: #F2F7F5 !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         [data-baseweb="select"] span {
-          color: #F2F7F5 !important;
+          color: #F8FAFC !important;
         }
         [data-baseweb="popover"], [data-baseweb="menu"], [data-baseweb="menu"] ul {
-          background-color: #132522 !important;
-          color: #F2F7F5 !important;
-          border-color: #23433D !important;
+          background-color: #162723 !important;
+          color: #F8FAFC !important;
+          border-color: #2D4E45 !important;
         }
         [data-baseweb="menu"] li {
-          color: #F2F7F5 !important;
+          color: #F8FAFC !important;
         }
         [data-baseweb="menu"] li:hover, [data-baseweb="menu"] li[aria-selected="true"] {
-          background-color: #1A302C !important;
+          background-color: #1E352F !important;
+          color: #34D399 !important;
         }
         [data-testid="stExpander"] {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
         }
         [data-testid="stExpander"] summary {
-          color: #F2F7F5 !important;
+          color: #F8FAFC !important;
         }
         [data-testid="stExpander"] summary:hover {
-          color: #25C997 !important;
+          color: #34D399 !important;
         }
+        [data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+          border-top: 1px solid #2D4E45 !important;
+        }
+
+        /* Tabs in Dark Mode */
+        [data-testid="stTabs"] [data-baseweb="tab-list"] {
+          border-bottom: 2px solid #2D4E45 !important;
+        }
+        [data-testid="stTabs"] [data-baseweb="tab"] {
+          color: #CBD5E1 !important;
+          font-weight: 600 !important;
+        }
+        [data-testid="stTabs"] [data-baseweb="tab"]:hover {
+          color: #F8FAFC !important;
+        }
+        [data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] {
+          color: #34D399 !important;
+          border-bottom-color: #34D399 !important;
+          font-weight: 700 !important;
+        }
+
+        /* File Uploader in Dark Mode */
+        [data-testid="stFileUploader"] {
+          background-color: transparent !important;
+        }
+        [data-testid="stFileUploaderDropzone"] {
+          background-color: #1E352F !important;
+          border: 2px dashed #2D4E45 !important;
+        }
+        [data-testid="stFileUploaderDropzone"]:hover {
+          border-color: #34D399 !important;
+          background-color: #25413A !important;
+        }
+        [data-testid="stFileUploaderDropzoneInstructions"] {
+          color: #F8FAFC !important;
+        }
+        [data-testid="stFileUploaderDropzoneInstructions"] span {
+          color: #F8FAFC !important;
+        }
+        [data-testid="stFileUploaderDropzoneInstructions"] small {
+          color: #CBD5E1 !important;
+          font-weight: 500 !important;
+        }
+        [data-testid="stFileUploaderDropzone"] button {
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
+        }
+        [data-testid="stFileUploaderDropzone"] button:hover {
+          border-color: #34D399 !important;
+          color: #34D399 !important;
+          background-color: #1E352F !important;
+        }
+        [data-testid="stFileUploaderFile"] {
+          background-color: #1E352F !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
+        }
+        [data-testid="stFileUploaderFile"] div,
+        [data-testid="stFileUploaderFile"] span {
+          color: #F8FAFC !important;
+        }
+        [data-testid="stFileUploaderFile"] small {
+          color: #CBD5E1 !important;
+        }
+
+        /* Camera Input in Dark Mode */
+        [data-testid="stCameraInput"] {
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+        }
+        [data-testid="stCameraInput"] video {
+          border-color: #2D4E45 !important;
+        }
+        [data-testid="stCameraInput"] button {
+          background: linear-gradient(135deg, #10B981, #059669) !important;
+          color: #FFFFFF !important;
+          border-color: #34D399 !important;
+        }
+
+        /* Native Alerts in Dark Mode */
+        [data-testid="stAlert"] {
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
+        }
+        [data-testid="stAlert"] p {
+          color: #F8FAFC !important;
+        }
+
+        /* Buttons in Dark Mode */
         .stButton > button {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
-          color: #F2F7F5 !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         .stButton > button:hover {
-          background-color: #1A302C !important;
-          color: #25C997 !important;
-          border-color: #25C997 !important;
+          background-color: #1E352F !important;
+          color: #34D399 !important;
+          border-color: #34D399 !important;
         }
-        .stButton > button:disabled {
-          background-color: #1A302C !important;
-          color: #25C997 !important;
-          border-color: #1F8F70 !important;
-          font-weight: 600 !important;
+        /* Active navigation button in navbar */
+        div[class*="st-key-nav_"] button:disabled {
+          background: linear-gradient(135deg, #10B981, #059669) !important;
+          color: #FFFFFF !important;
+          border-color: #34D399 !important;
+          font-weight: 700 !important;
+          box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35) !important;
+          opacity: 1 !important;
+          cursor: default !important;
+        }
+        /* Normal disabled buttons */
+        .stButton > button:disabled:not([key*="nav_"]) {
+          background-color: #1A2E28 !important;
+          color: #94A3B8 !important;
+          border-color: #223C35 !important;
+          opacity: 0.55 !important;
+        }
+        /* Primary buttons */
+        .stButton > button[kind="primary"],
+        .stButton > button[data-testid="baseButton-primary"],
+        .stFormSubmitButton > button {
+          background: linear-gradient(135deg, #10B981, #059669) !important;
+          color: #FFFFFF !important;
+          font-weight: 700 !important;
+          border: 1px solid #34D399 !important;
+          box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4) !important;
+        }
+        .stButton > button[kind="primary"]:hover,
+        .stButton > button[data-testid="baseButton-primary"]:hover,
+        .stFormSubmitButton > button:hover {
+          background: linear-gradient(135deg, #059669, #047857) !important;
+          color: #FFFFFF !important;
+          box-shadow: 0 4px 14px rgba(16, 185, 129, 0.5) !important;
         }
 
         /* --------------------------------------------------------------------------
            KISANSENSE ASSISTANT (Native Charcoal-Green Dashboard Panel)
            -------------------------------------------------------------------------- */
-
-        /* Assistant Panel Container */
         .assistant-dashboard-panel,
         .st-key-home_assistant_panel {
-          background-color: #132522 !important;
-          border: 1px solid #23433D !important;
-          border-radius: 12px !important;
-          padding: 1.25rem 1.25rem 1rem 1.25rem !important;
+          background-color: #162723 !important;
+          border: 1px solid #2D4E45 !important;
+          border-radius: 14px !important;
+          padding: 1.35rem 1.35rem 1.1rem 1.35rem !important;
           margin-top: 1rem !important;
           margin-bottom: 1.5rem !important;
           box-shadow: none !important;
         }
         [data-testid="stVerticalBlockBorderWrapper"]:has(.st-key-home_assistant_panel),
         [data-testid="stVerticalBlockBorderWrapper"]:has(.assistant-dashboard-panel) {
-          background-color: #132522 !important;
-          border: 1px solid #23433D !important;
-          border-radius: 12px !important;
+          background-color: #162723 !important;
+          border: 1px solid #2D4E45 !important;
+          border-radius: 14px !important;
           box-shadow: none !important;
-        }
-
-        /* Assistant Header */
-        .assistant-panel-header {
-          display: flex !important;
-          align-items: center !important;
-          gap: 0.75rem !important;
-          margin-bottom: 0.85rem !important;
         }
         .assistant-header-icon {
-          width: 36px !important;
-          height: 36px !important;
-          min-width: 36px !important;
-          border-radius: 50% !important;
-          background-color: #162A27 !important;
-          border: 1px solid #23433D !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          font-size: 1.15rem !important;
-          flex-shrink: 0 !important;
+          background-color: #1E352F !important;
+          border: 1px solid #2D4E45 !important;
         }
         .assistant-title {
-          font-family: var(--font-sans) !important;
-          font-size: 1.15rem !important;
-          font-weight: 700 !important;
-          color: #F2F7F5 !important;
-          margin: 0 !important;
-          line-height: 1.2 !important;
+          color: #F8FAFC !important;
         }
         .assistant-subtitle {
-          font-size: 0.88rem !important;
-          color: #A9BFBA !important;
-          margin: 0.2rem 0 0 0 !important;
-          line-height: 1.4 !important;
+          color: #CBD5E1 !important;
         }
 
-        /* Prompt Chips: compact, subtle border, light text, dark-green hover */
+        /* Prompt Chips */
         div[class*="st-key-chip_home_"] button,
         div[class*="st-key-chip_asst_"] button {
-          background-color: #162A27 !important;
-          border: 1px solid #2A5149 !important;
-          color: #F2F7F5 !important;
-          font-size: 0.82rem !important;
-          font-weight: 500 !important;
-          padding: 0.35rem 0.65rem !important;
-          border-radius: 6px !important;
-          min-height: 32px !important;
-          height: 32px !important;
-          white-space: nowrap !important;
-          text-overflow: ellipsis !important;
-          overflow: hidden !important;
-          transition: all 0.15s ease !important;
-          box-shadow: none !important;
+          background-color: #1E352F !important;
+          border: 1px solid #2D4E45 !important;
+          color: #F8FAFC !important;
+          font-weight: 600 !important;
         }
         div[class*="st-key-chip_home_"] button:hover,
         div[class*="st-key-chip_asst_"] button:hover {
-          background-color: #1F8F70 !important;
-          border-color: #25C997 !important;
+          background-color: #10B981 !important;
+          border-color: #34D399 !important;
           color: #FFFFFF !important;
         }
 
         /* Chat Messages */
         [data-testid="stChatMessage"] {
           background-color: #18312C !important;
-          border: 1px solid #23433D !important;
-          border-radius: 10px !important;
-          color: #F2F7F5 !important;
-          padding: 0.75rem 1rem !important;
-          margin-bottom: 0.65rem !important;
-          box-shadow: none !important;
+          border: 1px solid #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]),
         [data-testid="stChatMessage"][data-role="user"] {
-          background-color: #1A302C !important;
-          border-color: #2A5149 !important;
-          color: #F2F7F5 !important;
+          background-color: #1E352F !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]),
         [data-testid="stChatMessage"][data-role="assistant"] {
-          background-color: #18312C !important;
-          border-color: #23433D !important;
-          border-left: 3px solid #1F8F70 !important;
-          color: #F2F7F5 !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          border-left: 3px solid #10B981 !important;
+          color: #F8FAFC !important;
         }
         [data-testid="stChatMessage"] p,
         [data-testid="stChatMessage"] div,
         [data-testid="stChatMessage"] span {
-          color: #F2F7F5 !important;
+          color: #F8FAFC !important;
         }
         [data-testid="stChatMessage"] [data-testid="stChatMessageAvatarCustom"],
         [data-testid="stChatMessage"] [data-testid="chatAvatarIcon-assistant"],
         [data-testid="stChatMessage"] [data-testid="chatAvatarIcon-user"] {
-          background-color: #162A27 !important;
-          border: 1px solid #23433D !important;
+          background-color: #1E352F !important;
+          border: 1px solid #2D4E45 !important;
         }
 
-        /* Chat Input Bar: compact, dark charcoal-green background, subtle border */
+        /* Chat Input Bar */
         [data-testid="stChatInput"] {
           background-color: #10201D !important;
-          border: 1px solid #2A5149 !important;
-          border-radius: 10px !important;
-          box-shadow: none !important;
-          padding: 3px 6px !important;
+          border: 1px solid #2D4E45 !important;
+          border-radius: 12px !important;
         }
         [data-testid="stChatInput"]:focus-within {
-          border-color: #25C997 !important;
-          box-shadow: 0 0 0 1px #25C997 !important;
-        }
-        [data-testid="stChatInput"] > div {
-          background-color: transparent !important;
+          border-color: #34D399 !important;
+          box-shadow: 0 0 0 1px #34D399 !important;
         }
         [data-testid="stChatInput"] textarea {
-          color: #F2F7F5 !important;
-          font-family: var(--font-sans) !important;
-          font-size: 0.9rem !important;
-          background-color: transparent !important;
-          min-height: 38px !important;
+          color: #F8FAFC !important;
         }
         [data-testid="stChatInput"] textarea::placeholder {
-          color: #A9BFBA !important;
+          color: #94A3B8 !important;
         }
         [data-testid="stChatInput"] button,
         [data-testid="stChatInputSubmitButton"] {
-          background-color: #1F8F70 !important;
-          color: #F2F7F5 !important;
-          border-radius: 50% !important;
-          border: none !important;
-          width: 32px !important;
-          height: 32px !important;
-          min-height: 32px !important;
-          max-height: 32px !important;
-          display: inline-flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          transition: background-color 0.2s ease !important;
-          margin: auto 0 !important;
+          background-color: #10B981 !important;
+          color: #FFFFFF !important;
         }
         [data-testid="stChatInput"] button:hover,
         [data-testid="stChatInputSubmitButton"]:hover {
-          background-color: #25C997 !important;
-          color: #0B1412 !important;
-        }
-        [data-testid="stChatInput"] button:disabled,
-        [data-testid="stChatInputSubmitButton"]:disabled {
-          background-color: #1A302C !important;
-          color: #5E7A73 !important;
+          background-color: #34D399 !important;
+          color: #0F1916 !important;
         }
         [data-testid="stChatInputInstructions"] {
-          color: #5E7A73 !important;
-          font-size: 0.72rem !important;
-        }
-
-        /* Prevent any white or light floating dock bar */
-        [data-testid="stBottom"],
-        [data-testid="stBottom"] > div,
-        [data-testid="stBottomBlockContainer"],
-        .stBottom {
-          background: transparent !important;
-          background-color: transparent !important;
-          box-shadow: none !important;
+          color: #94A3B8 !important;
         }
 
         /* --------------------------------------------------------------------------
            DASHBOARD HEROES & CARDS (Dark Theme Cohesion)
            -------------------------------------------------------------------------- */
         .farm-health-hero-good {
-          background: linear-gradient(135deg, #132522 88%, #162A27 100%) !important;
+          background: linear-gradient(135deg, #162723 88%, #1E352F 100%) !important;
         }
         .farm-health-hero-warning {
-          background: linear-gradient(135deg, #132522 88%, #2d2010 100%) !important;
+          background: linear-gradient(135deg, #162723 88%, #382408 100%) !important;
         }
         .farm-health-hero-alert {
-          background: linear-gradient(135deg, #132522 88%, #2d1812 100%) !important;
+          background: linear-gradient(135deg, #162723 88%, #3B1414 100%) !important;
         }
         .farm-health-hero-critical {
-          background: linear-gradient(135deg, #132522 88%, #361414 100%) !important;
+          background: linear-gradient(135deg, #162723 88%, #450A0A 100%) !important;
         }
         .metric-card {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
         }
         .insight-card {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
         }
         .action-hero-card {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
         }
         .action-secondary-box {
-          background-color: #162A27 !important;
-          border-color: #23433D !important;
-          color: #F2F7F5 !important;
+          background-color: #1E352F !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         .vision-card, .vision-guidance-item {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
-          color: #F2F7F5 !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         .vision-section-box {
-          background-color: #162A27 !important;
-          border-color: #23433D !important;
-          color: #F2F7F5 !important;
+          background-color: #1E352F !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         .vision-result-healthy {
-          background: linear-gradient(135deg, #132522 88%, #162A27 100%) !important;
+          background: linear-gradient(135deg, #162723 88%, #1E352F 100%) !important;
         }
         .vision-result-warning {
-          background: linear-gradient(135deg, #132522 88%, #2d2010 100%) !important;
+          background: linear-gradient(135deg, #162723 88%, #382408 100%) !important;
         }
         .vision-result-rejected {
-          background: linear-gradient(135deg, #132522 88%, #2d1812 100%) !important;
+          background: linear-gradient(135deg, #162723 88%, #3B1414 100%) !important;
         }
         .weather-context-banner, .weather-metric-card, .weather-impact-card, .forecast-card, .weather-no-risks-card, .weather-assistant-box {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
-          color: #F2F7F5 !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         .weather-action-hero {
-          background-color: #132522 !important;
+          background-color: #162723 !important;
         }
         .weather-action-good {
-          background: linear-gradient(135deg, #132522 88%, #162A27 100%) !important;
-          border-color: #25C997 !important;
+          background: linear-gradient(135deg, #162723 88%, #1E352F 100%) !important;
+          border-color: #34D399 !important;
         }
         .weather-action-warning {
-          background: linear-gradient(135deg, #132522 88%, #2d2010 100%) !important;
-          border-color: #E5A43B !important;
+          background: linear-gradient(135deg, #162723 88%, #382408 100%) !important;
+          border-color: #FBBF24 !important;
         }
         .weather-action-alert {
-          background: linear-gradient(135deg, #132522 88%, #2d1812 100%) !important;
-          border-color: #E5684A !important;
+          background: linear-gradient(135deg, #162723 88%, #3B1414 100%) !important;
+          border-color: #F87171 !important;
         }
         .weather-risk-banner {
-          background-color: #132522 !important;
+          background-color: #162723 !important;
         }
         .home-weather-banner {
-          background-color: #132522 !important;
-          border-color: #23433D !important;
-          color: #F2F7F5 !important;
+          background-color: #162723 !important;
+          border-color: #2D4E45 !important;
+          color: #F8FAFC !important;
         }
         </style>
         """
