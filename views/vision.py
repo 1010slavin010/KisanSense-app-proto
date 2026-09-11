@@ -151,25 +151,17 @@ def render() -> None:
     with col_result:
         # Case A: Quality Gate Rejected
         if not result.success or result.image_quality != "good":
-            st.markdown(
-                f"""
-                <div class="vision-card vision-result-rejected">
-                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--color-alert); margin-bottom: 0.4rem;">
-                        📷 {t("vision_quality_reject_title")}
-                    </div>
-                    <p style="color: var(--color-text); margin-bottom: 0.65rem; font-size: 0.92rem;">
-                        {result.explanation}
-                    </p>
-                    <div class="vision-section-box">
-                        <strong style="color: var(--color-primary); font-size: 0.85rem;">💡 {t("vision_what_to_do")}:</strong>
-                        <p style="margin: 0.25rem 0 0 0; color: var(--color-text); font-size: 0.9rem;">
-                            {result.recommended_action}
-                        </p>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            reject_elements = [
+                '<div class="vision-card vision-result-rejected">',
+                f'<div style="font-size: 1.15rem; font-weight: 700; color: var(--color-alert); margin-bottom: 0.4rem;">📷 {t("vision_quality_reject_title")}</div>',
+                f'<p style="color: var(--color-text); margin-bottom: 0.65rem; font-size: 0.92rem;">{result.explanation}</p>',
+                '<div class="vision-section-box">',
+                f'<strong style="color: var(--color-primary); font-size: 0.85rem;">💡 {t("vision_what_to_do")}:</strong>',
+                f'<p style="margin: 0.25rem 0 0 0; color: var(--color-text); font-size: 0.9rem;">{result.recommended_action}</p>',
+                '</div>',
+                '</div>',
+            ]
+            st.markdown("".join(reject_elements), unsafe_allow_html=True)
             return
 
         # Case B: Diagnostic Result
@@ -201,45 +193,29 @@ def render() -> None:
         affected_ratio = getattr(result, "affected_foliage_ratio", 0.0)
         affected_str = f" • 🍃 Affected foliage: ~{affected_ratio*100:.1f}%" if affected_ratio > 0.0 else ""
 
-        st.markdown(
-            f"""
-            <div class="vision-card {card_class}">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
-                    <span style="font-size: 0.85rem; font-weight: 700; color: {headline_color}; text-transform: uppercase; letter-spacing: 0.04em;">
-                        ● CROP HEALTH — {headline_text}
-                    </span>
-                    {conf_badge}
-                </div>
-                <div style="font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.35rem;">
-                    {result.diagnosis}
-                </div>
-                <div style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0.75rem;">
-                    🌾 <strong>{result.crop}</strong> • Category: <strong>{category_label}</strong> • Urgency: <strong>{urgency_label}</strong>{affected_str}
-                </div>
-                <div class="vision-section-box">
-                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">
-                        🔬 Symptoms Detected
-                    </div>
-                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text-secondary); font-size: 0.88rem;">
-                        {symptoms_str}
-                    </p>
-                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">
-                        🔍 Screening Assessment
-                    </div>
-                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
-                        {result.explanation}
-                    </p>
-                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.03em;">
-                        🌱 Recommended Cultural Action
-                    </div>
-                    <p style="margin: 0.2rem 0 0 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
-                        {result.recommended_action}
-                    </p>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        card_elements = [
+            f'<div class="vision-card {card_class}">',
+            '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">',
+            f'<span style="font-size: 0.85rem; font-weight: 700; color: {headline_color}; text-transform: uppercase; letter-spacing: 0.04em;">',
+            f'● CROP HEALTH — {headline_text}',
+            '</span>',
+            conf_badge,
+            '</div>',
+            f'<div style="font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.35rem;">{result.diagnosis}</div>',
+            f'<div style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0.75rem;">',
+            f'🌾 <strong>{result.crop}</strong> • Category: <strong>{category_label}</strong> • Urgency: <strong>{urgency_label}</strong>{affected_str}',
+            '</div>',
+            '<div class="vision-section-box">',
+            '<div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">🔬 Symptoms Detected</div>',
+            f'<p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text-secondary); font-size: 0.88rem;">{symptoms_str}</p>',
+            '<div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">🔍 Screening Assessment</div>',
+            f'<p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">{result.explanation}</p>',
+            '<div style="font-size: 0.82rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.03em;">🌱 Recommended Cultural Action</div>',
+            f'<p style="margin: 0.2rem 0 0 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">{result.recommended_action}</p>',
+            '</div>',
+            '</div>',
+        ]
+        st.markdown("".join(card_elements), unsafe_allow_html=True)
 
         st.button(
             f"💬 {t('vision_ask_assistant_btn')}",

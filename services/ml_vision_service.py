@@ -171,6 +171,11 @@ def _load_keras_model_safely(model_path: Path) -> tuple[Any | None, str | None]:
         return model, None
     except (ImportError, OSError, RuntimeError, Exception) as exc:
         err_msg = f"{type(exc).__name__}: {exc}"
+        if "optree" in err_msg.lower():
+            try:
+                import optree  # noqa: F401
+            except Exception as opt_err:
+                err_msg = f"{err_msg} -> Underlying cause: {type(opt_err).__name__}: {opt_err}"
         logger.warning("Could not load Keras model from %s: %s", model_path, err_msg)
         return None, err_msg
 
@@ -252,6 +257,15 @@ def get_model_status(model_path: Path | None = None) -> ModelStatus:
     reason = _MODEL_LOAD_ERROR or "Model not loaded."
     if not exists:
         reason = f"Model file '{MODEL_FILENAME}' is missing from {path.parent}."
+    elif _MODEL_LOAD_ERROR and ("optree" in _MODEL_LOAD_ERROR.lower() or "tensorflow" in _MODEL_LOAD_ERROR.lower()):
+        import sys
+        if sys.version_info >= (3, 13):
+            py_ver = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+            reason = (
+                f"{reason} [Environment note: Current runtime is Python {py_ver}. "
+                f"Production TensorFlow/Keras runtime requires Python <= 3.12, "
+                f"as declared in requirements.txt ('tensorflow-cpu>=2.16; python_version < \"3.13\"')]."
+            )
 
     return ModelStatus(
         available=False,

@@ -90,25 +90,17 @@ def _render_result_card(result: VisionAnalysisResult, image_bytes: bytes | None)
     with col_diag:
         # Case A: Quality Gate Failed / Low Quality
         if not result.success or result.image_quality != "good":
-            st.markdown(
-                f"""
-                <div class="vision-card vision-result-rejected">
-                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--color-alert); margin-bottom: 0.4rem;">
-                        📷 {t('vision_quality_reject_title')}
-                    </div>
-                    <p style="color: var(--color-text); margin-bottom: 0.65rem; font-size: 0.92rem;">
-                        {result.explanation}
-                    </p>
-                    <div class="vision-section-box">
-                        <strong style="color: var(--color-primary); font-size: 0.85rem;">💡 {t('camera_scan_action')}:</strong>
-                        <p style="margin: 0.25rem 0 0 0; color: var(--color-text); font-size: 0.9rem;">
-                            {t('camera_scan_uncertain')} {result.recommended_action}
-                        </p>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            reject_elements = [
+                '<div class="vision-card vision-result-rejected">',
+                f'<div style="font-size: 1.15rem; font-weight: 700; color: var(--color-alert); margin-bottom: 0.4rem;">📷 {t("vision_quality_reject_title")}</div>',
+                f'<p style="color: var(--color-text); margin-bottom: 0.65rem; font-size: 0.92rem;">{result.explanation}</p>',
+                '<div class="vision-section-box">',
+                f'<strong style="color: var(--color-primary); font-size: 0.85rem;">💡 {t("camera_scan_action")}:</strong>',
+                f'<p style="margin: 0.25rem 0 0 0; color: var(--color-text); font-size: 0.9rem;">{t("camera_scan_uncertain")} {result.recommended_action}</p>',
+                '</div>',
+                '</div>',
+            ]
+            st.markdown("".join(reject_elements), unsafe_allow_html=True)
             return
 
         # Case B: Successful Diagnostic
@@ -130,11 +122,13 @@ def _render_result_card(result: VisionAnalysisResult, image_bytes: bytes | None)
 
         low_conf_banner = ""
         if result.confidence < 0.60 or result.confidence_level == "low":
-            low_conf_banner = """
-            <div style="margin: 0.6rem 0; padding: 0.65rem 0.85rem; border-radius: 8px; background: rgba(217, 119, 6, 0.12); border: 1px solid rgba(217, 119, 6, 0.3); color: var(--color-warning); font-size: 0.86rem; line-height: 1.45;">
-                <strong>⚠️ Low Confidence Notice:</strong> AI confidence is low. Please take a clearer photo in good natural daylight or consult a local agriculture expert.
-            </div>
-            """
+            low_conf_banner = (
+                '<div style="margin: 0.6rem 0; padding: 0.65rem 0.85rem; border-radius: 8px; '
+                'background: rgba(217, 119, 6, 0.12); border: 1px solid rgba(217, 119, 6, 0.3); '
+                'color: var(--color-warning); font-size: 0.86rem; line-height: 1.45;">'
+                '<strong>⚠️ Low Confidence Notice:</strong> AI confidence is low. Please take a clearer photo in good natural daylight or consult a local agriculture expert.'
+                '</div>'
+            )
 
         if result.healthy:
             card_class = "vision-result-healthy"
@@ -153,46 +147,29 @@ def _render_result_card(result: VisionAnalysisResult, image_bytes: bytes | None)
             else t("vision_no_symptoms")
         )
 
-        st.markdown(
-            f"""
-            <div class="vision-card {card_class}">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
-                    <span style="font-size: 0.85rem; font-weight: 700; color: {headline_color}; text-transform: uppercase; letter-spacing: 0.04em;">
-                        🌿 {t('camera_scan_result_title')} — {status_text}
-                    </span>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        {method_badge}
-                        {conf_badge}
-                    </div>
-                </div>
-                <div style="font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">
-                    {result.diagnosis}
-                </div>
-                <div style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0.65rem;">
-                    🌾 <strong>{result.crop}</strong> • Category: <strong>{result.category.replace('_', ' ').title()}</strong> • Method: <strong>{detection_method}</strong>
-                </div>
-                {low_conf_banner}
-                <div class="vision-section-box">
-                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">
-                        🔬 {t('camera_scan_observed')}
-                    </div>
-                    <p style="margin: 0.2rem 0 0.45rem 0; color: var(--color-text-secondary); font-size: 0.88rem;">
-                        {symptoms_str}
-                    </p>
-                    <p style="margin: 0.2rem 0 0.55rem 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
-                        <strong>What this means:</strong> {result.explanation}
-                    </p>
-                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.03em;">
-                        🌱 {t('camera_scan_action')}
-                    </div>
-                    <p style="margin: 0.2rem 0 0 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
-                        <strong>What to do:</strong> {result.recommended_action}
-                    </p>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        card_elements = [
+            f'<div class="vision-card {card_class}">',
+            '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">',
+            f'<span style="font-size: 0.85rem; font-weight: 700; color: {headline_color}; text-transform: uppercase; letter-spacing: 0.04em;">',
+            f'🌿 {t("camera_scan_result_title")} — {status_text}',
+            '</span>',
+            f'<div style="display: flex; align-items: center; gap: 6px;">{method_badge}{conf_badge}</div>',
+            '</div>',
+            f'<div style="font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">{result.diagnosis}</div>',
+            f'<div style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0.65rem;">',
+            f'🌾 <strong>{result.crop}</strong> • Category: <strong>{result.category.replace("_", " ").title()}</strong> • Method: <strong>{detection_method}</strong>',
+            '</div>',
+            low_conf_banner,
+            '<div class="vision-section-box">',
+            f'<div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">🔬 {t("camera_scan_observed")}</div>',
+            f'<p style="margin: 0.2rem 0 0.45rem 0; color: var(--color-text-secondary); font-size: 0.88rem;">{symptoms_str}</p>',
+            f'<p style="margin: 0.2rem 0 0.55rem 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;"><strong>What this means:</strong> {result.explanation}</p>',
+            f'<div style="font-size: 0.82rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.03em;">🌱 {t("camera_scan_action")}</div>',
+            f'<p style="margin: 0.2rem 0 0 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;"><strong>What to do:</strong> {result.recommended_action}</p>',
+            '</div>',
+            '</div>',
+        ]
+        st.markdown("".join(card_elements), unsafe_allow_html=True)
 
         class_probs = getattr(result, "class_probabilities", {})
         if class_probs:
@@ -209,11 +186,9 @@ def _render_result_card(result: VisionAnalysisResult, image_bytes: bytes | None)
         )
 
     st.markdown(
-        """
-        <div class="vision-disclaimer">
-            <strong>⚠️ AI Screening Notice:</strong> This assessment is an automated computer vision screening tool intended for early field detection and agronomic advisory. It is not a definitive laboratory diagnostic. Confirm severe symptoms with local agricultural extension officers before taking major chemical interventions.
-        </div>
-        """,
+        '<div class="vision-disclaimer">'
+        '<strong>⚠️ AI Screening Notice:</strong> This assessment is an automated computer vision screening tool intended for early field detection and agronomic advisory. It is not a definitive laboratory diagnostic. Confirm severe symptoms with local agricultural extension officers before taking major chemical interventions.'
+        '</div>',
         unsafe_allow_html=True,
     )
 

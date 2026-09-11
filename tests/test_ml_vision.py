@@ -402,6 +402,120 @@ class TestMLVisionBackend(unittest.TestCase):
             "Early Blight" in response or "Tomato" in response or "Plant Health" in response
         )
 
+    # -------------------------------------------------------------------------
+    # 7. UI Rendering Regression Tests
+    # -------------------------------------------------------------------------
+    def test_result_card_html_rendering_no_code_blocks(self) -> None:
+        """Verify _render_result_card produces pure HTML with zero code-block escapes.
+
+        Regression test: Prevents CommonMark/Streamlit from interpreting 4-space
+        indentations or blank lines as an indented code block (<pre><code>).
+        """
+        from views.farm import _render_result_card
+        import markdown_it
+
+        md = markdown_it.MarkdownIt()
+
+        test_cases = [
+            # Case 1: High confidence ML result
+            VisionAnalysisResult(
+                success=True,
+                is_plant=True,
+                healthy=False,
+                diagnosis="Tomato Early Blight",
+                disease_code="TOMATO_EARLY_BLIGHT",
+                crop="Tomato",
+                category="fungal",
+                confidence=0.92,
+                confidence_level="high",
+                explanation="Dark water-soaked necrotic foliar lesions observed across crop leaves.",
+                recommended_action="Isolate affected plants where practical, ensure canopy ventilation, avoid wetting leaves during watering, and consult your local agricultural expert.",
+                image_quality="good",
+                symptoms_detected=["dark_water_soaked_spots", "foliar_necrosis"],
+                model_source="plant_model_v5",
+                inference_backend="ml_keras",
+            ),
+            # Case 2: Low confidence ML result (triggers low_conf_banner)
+            VisionAnalysisResult(
+                success=True,
+                is_plant=True,
+                healthy=False,
+                diagnosis="Tomato Late Blight",
+                disease_code="TOMATO_LATE_BLIGHT",
+                crop="Tomato",
+                category="fungal",
+                confidence=0.52,
+                confidence_level="low",
+                explanation="Irregular dark water-soaked patches expanding rapidly.",
+                recommended_action="Improve air flow and remove heavily affected foliage.",
+                image_quality="good",
+                symptoms_detected=["water_soaked_patches"],
+                model_source="plant_model_v5",
+                inference_backend="ml_keras",
+            ),
+            # Case 3: Local Vision Engine fallback
+            VisionAnalysisResult(
+                success=True,
+                is_plant=True,
+                healthy=True,
+                diagnosis="Healthy Foliage",
+                disease_code="HEALTHY",
+                crop="Tomato",
+                category="healthy",
+                confidence=0.88,
+                confidence_level="high",
+                explanation="Leaf lamina exhibits balanced chlorophyll pigmentation.",
+                recommended_action="Maintain routine crop care and monitoring.",
+                image_quality="good",
+                model_source="deterministic_vision_engine",
+                inference_backend="deterministic_fallback",
+            ),
+        ]
+
+        for case in test_cases:
+            captured_markdown: list[tuple[str, dict]] = []
+            with patch("streamlit.markdown", side_effect=lambda content, **kwargs: captured_markdown.append((content, kwargs))):
+                with patch("streamlit.button"):
+                    with patch("streamlit.expander"):
+                        _render_result_card(case, None)
+
+            self.assertGreater(len(captured_markdown), 0)
+
+            # Find the main diagnostic card call
+            card_calls = [
+                (content, kwargs)
+                for content, kwargs in captured_markdown
+                if "vision-card" in content and "vision-section-box" in content
+            ]
+            self.assertEqual(len(card_calls), 1)
+            card_content, kwargs = card_calls[0]
+
+            # 1. Must use unsafe_allow_html=True
+            self.assertTrue(kwargs.get("unsafe_allow_html"), "Result card must specify unsafe_allow_html=True")
+
+            # 2. Markdown parsing must not create code blocks
+            tokens = md.parse(card_content)
+            code_tokens = [t for t in tokens if t.type in ("code_block", "fence")]
+            self.assertEqual(
+                len(code_tokens),
+                0,
+                f"Result card markdown contains unwanted code block tokens: {code_tokens}",
+            )
+
+            # 3. Rendered HTML must not wrap card contents in <pre> or <code>
+            rendered = md.render(card_content)
+            self.assertNotIn("<pre>", rendered)
+            self.assertNotIn("<code>", rendered)
+
+            # 4. Critical agronomic UI sections must be present in the content
+            self.assertIn(case.diagnosis, card_content)
+            self.assertIn(case.crop, card_content)
+            self.assertIn(case.explanation, card_content)
+            self.assertIn(case.recommended_action, card_content)
+            self.assertIn("What this means:", card_content)
+            self.assertIn("What to do:", card_content)
+
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -356,8 +356,8 @@ def analyze_plant_image(
             raw_len = image_input.getbuffer().nbytes
         except Exception:
             raw_len = 0
-    elif hasattr(image_input, "size"):
-        raw_len = getattr(image_input, "size", 0)
+    elif hasattr(image_input, "size") and isinstance(image_input.size, int):
+        raw_len = image_input.size
 
     if raw_len > 10 * 1024 * 1024:
         return VisionAnalysisResult(
@@ -462,7 +462,8 @@ def analyze_plant_image(
     try:
         from services.ml_vision_service import run_ml_inference
         ml_res = run_ml_inference(img, ctx)
-    except Exception:
+    except Exception as exc:
+        logger.warning("ML vision inference invocation failed: %s", exc, exc_info=True)
         ml_res = None
 
     if ml_res is not None and ml_res.success:
@@ -498,6 +499,17 @@ def analyze_plant_image(
             class_probabilities=ml_res.class_probabilities,
             predicted_class=ml_res.raw_class_name,
         )
+
+    # Fallback diagnostics: log clearly why we fall back to deterministic vision
+    try:
+        from services.ml_vision_service import get_model_status
+        status = get_model_status()
+        logger.info(
+            "Primary ML crop model unavailable (%s); using deterministic local vision engine fallback.",
+            status.reason,
+        )
+    except Exception:
+        pass
 
     # Fallback to deterministic foliar symptom screening engine
     healthy, diag, code, category, conf, expl, act, symptoms, aff_ratio, urgency = _diagnose_foliar_symptoms(img, ctx)
