@@ -446,6 +446,7 @@ def render() -> None:
             badge_class = "badge-good" if latest_vision.healthy else "badge-warning"
             status_text = "Healthy Foliage" if latest_vision.healthy else "Possible Stress Detected"
             diagnosis_text = latest_vision.diagnosis
+            backend_label = "AI Crop Model" if getattr(latest_vision, "inference_backend", "") == "ml_keras" else "Local Engine"
 
             st.markdown(
                 f"""
@@ -455,7 +456,7 @@ def render() -> None:
                         <span class="badge {badge_class}">● {status_text}</span>
                     </div>
                     <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 0.65rem;">
-                        Confidence: <strong>{conf_pct}%</strong> • Crop: <strong>{latest_vision.crop}</strong>
+                        Confidence: <strong>{conf_pct}%</strong> • Crop: <strong>{latest_vision.crop}</strong> • Method: <strong>{backend_label}</strong>
                     </div>
                 </div>
                 """,

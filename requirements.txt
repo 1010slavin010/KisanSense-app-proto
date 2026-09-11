@@ -1,3 +1,6 @@
 streamlit>=1.30
 pillow>=9.0
 numpy>=1.20
+keras>=3.0
+h5py>=3.8
+tensorflow-cpu>=2.16; python_version < "3.13"

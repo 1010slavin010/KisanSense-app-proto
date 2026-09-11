@@ -120,6 +120,22 @@ def _render_result_card(result: VisionAnalysisResult, image_bytes: bytes | None)
         else:
             conf_badge = f'<span class="vision-badge-low">● Low Confidence ({conf_pct}%)</span>'
 
+        is_ml = getattr(result, "inference_backend", "") == "ml_keras"
+        detection_method = "AI Crop Model" if is_ml else "Local Vision Engine"
+        method_badge = (
+            '<span style="background: rgba(16, 185, 129, 0.15); color: var(--color-primary); font-weight: 600; font-size: 0.76rem; padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.3);">🤖 AI Crop Model</span>'
+            if is_ml
+            else '<span style="background: rgba(100, 116, 139, 0.15); color: var(--color-text-secondary); font-weight: 600; font-size: 0.76rem; padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(100, 116, 139, 0.3);">⚙️ Local Vision Engine</span>'
+        )
+
+        low_conf_banner = ""
+        if result.confidence < 0.60 or result.confidence_level == "low":
+            low_conf_banner = """
+            <div style="margin: 0.6rem 0; padding: 0.65rem 0.85rem; border-radius: 8px; background: rgba(217, 119, 6, 0.12); border: 1px solid rgba(217, 119, 6, 0.3); color: var(--color-warning); font-size: 0.86rem; line-height: 1.45;">
+                <strong>⚠️ Low Confidence Notice:</strong> AI confidence is low. Please take a clearer photo in good natural daylight or consult a local agriculture expert.
+            </div>
+            """
+
         if result.healthy:
             card_class = "vision-result-healthy"
             status_text = "Healthy"
@@ -140,39 +156,50 @@ def _render_result_card(result: VisionAnalysisResult, image_bytes: bytes | None)
         st.markdown(
             f"""
             <div class="vision-card {card_class}">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
                     <span style="font-size: 0.85rem; font-weight: 700; color: {headline_color}; text-transform: uppercase; letter-spacing: 0.04em;">
-                        ● {t('camera_scan_result_title')} — {status_text}
+                        🌿 {t('camera_scan_result_title')} — {status_text}
                     </span>
-                    {conf_badge}
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        {method_badge}
+                        {conf_badge}
+                    </div>
                 </div>
-                <div style="font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.35rem;">
+                <div style="font-size: 1.35rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">
                     {result.diagnosis}
                 </div>
-                <div style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0.75rem;">
-                    🌾 <strong>{result.crop}</strong> • Category: <strong>{result.category.replace('_', ' ').title()}</strong>
+                <div style="font-size: 0.84rem; color: var(--color-text-secondary); margin-bottom: 0.65rem;">
+                    🌾 <strong>{result.crop}</strong> • Category: <strong>{result.category.replace('_', ' ').title()}</strong> • Method: <strong>{detection_method}</strong>
                 </div>
+                {low_conf_banner}
                 <div class="vision-section-box">
                     <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.03em;">
                         🔬 {t('camera_scan_observed')}
                     </div>
-                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text-secondary); font-size: 0.88rem;">
+                    <p style="margin: 0.2rem 0 0.45rem 0; color: var(--color-text-secondary); font-size: 0.88rem;">
                         {symptoms_str}
                     </p>
-                    <p style="margin: 0.2rem 0 0.5rem 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
-                        {result.explanation}
+                    <p style="margin: 0.2rem 0 0.55rem 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
+                        <strong>What this means:</strong> {result.explanation}
                     </p>
                     <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.03em;">
                         🌱 {t('camera_scan_action')}
                     </div>
                     <p style="margin: 0.2rem 0 0 0; color: var(--color-text); font-size: 0.9rem; line-height: 1.45;">
-                        {result.recommended_action}
+                        <strong>What to do:</strong> {result.recommended_action}
                     </p>
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
+
+        class_probs = getattr(result, "class_probabilities", {})
+        if class_probs:
+            with st.expander("📊 View Model Prediction Probabilities", expanded=False):
+                for cname, cprob in class_probs.items():
+                    clean_cname = cname.replace("___", " - ").replace("_", " ")
+                    st.progress(cprob, text=f"{clean_cname}: {cprob * 100:.1f}%")
 
         st.button(
             f"💬 {t('camera_scan_ask_assistant')}",

@@ -47,6 +47,12 @@ class VisionAnalysisResult:
     symptoms_detected: list[str] = field(default_factory=list)
     affected_foliage_ratio: float = 0.0
     treatment_urgency: str = "none"      # "none" | "routine" | "moderate" | "immediate"
+    model_name: str = ""
+    model_version: str = ""
+    inference_backend: str = "deterministic_fallback"  # "ml_keras" | "deterministic_fallback"
+    model_confidence: float = 0.0
+    class_probabilities: dict[str, float] = field(default_factory=dict)
+    predicted_class: str = ""
 
 
 def _validate_image_quality(img: Image.Image) -> tuple[bool, str, list[str]]:
@@ -450,8 +456,50 @@ def analyze_plant_image(
         )
 
     # =========================================================================
-    # Step 3: Foliar Disease Classification & Agronomic Advice
+    # Step 3: Disease Classification (Primary ML Backend with Heuristic Fallback)
     # =========================================================================
+    ml_res = None
+    try:
+        from services.ml_vision_service import run_ml_inference
+        ml_res = run_ml_inference(img, ctx)
+    except Exception:
+        ml_res = None
+
+    if ml_res is not None and ml_res.success:
+        diag = f"{ml_res.crop} Healthy" if ml_res.healthy else f"{ml_res.crop} {ml_res.disease}"
+        warnings_list = list(ml_res.warnings)
+        warnings_list.append(
+            "Visual AI screening tool only. For high-value crops or ambiguous symptoms, consult your local Krishi Vigyan Kendra (KVK) or agricultural extension officer."
+        )
+        return VisionAnalysisResult(
+            success=True,
+            is_plant=True,
+            healthy=ml_res.healthy,
+            diagnosis=diag,
+            disease_code=ml_res.raw_class_name.upper().replace(" ", "_"),
+            crop=ml_res.crop,
+            category=ml_res.category,
+            confidence=ml_res.confidence,
+            confidence_level=ml_res.confidence_level,
+            explanation=ml_res.explanation,
+            recommended_action=ml_res.recommended_action,
+            image_quality="good",
+            image_quality_details=quality_details,
+            model_source="plant_model_v5",
+            warnings=warnings_list,
+            timestamp=now_str,
+            symptoms_detected=[ml_res.disease.lower().replace(" ", "_")] if not ml_res.healthy else [],
+            affected_foliage_ratio=0.0,
+            treatment_urgency=ml_res.urgency,
+            model_name=ml_res.model_name,
+            model_version=ml_res.model_version,
+            inference_backend="ml_keras",
+            model_confidence=ml_res.confidence,
+            class_probabilities=ml_res.class_probabilities,
+            predicted_class=ml_res.raw_class_name,
+        )
+
+    # Fallback to deterministic foliar symptom screening engine
     healthy, diag, code, category, conf, expl, act, symptoms, aff_ratio, urgency = _diagnose_foliar_symptoms(img, ctx)
 
     # Determine confidence tier
@@ -489,6 +537,12 @@ def analyze_plant_image(
         symptoms_detected=symptoms,
         affected_foliage_ratio=aff_ratio,
         treatment_urgency=urgency,
+        model_name="deterministic_vision_engine",
+        model_version="1.0",
+        inference_backend="deterministic_fallback",
+        model_confidence=conf,
+        class_probabilities={},
+        predicted_class=code,
     )
 
 
